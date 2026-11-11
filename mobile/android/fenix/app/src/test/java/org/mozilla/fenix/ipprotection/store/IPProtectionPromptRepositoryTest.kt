@@ -5,7 +5,6 @@
 package org.mozilla.fenix.ipprotection.store
 
 import junit.framework.TestCase.assertFalse
-import junit.framework.TestCase.assertTrue
 import mozilla.components.support.test.robolectric.testContext
 import org.json.JSONObject
 import org.junit.Before
@@ -16,6 +15,10 @@ import org.mozilla.fenix.nimbus.FxNimbus
 import org.mozilla.fenix.utils.Settings
 import org.robolectric.RobolectricTestRunner
 
+/**
+ * lavalynx: IP Protection (Mozilla VPN) is hard-disabled, so the onboarding prompt must never be shown, even when the
+ * secret-settings override or Nimbus would normally enable the feature.
+ */
 @RunWith(RobolectricTestRunner::class)
 class IPProtectionPromptRepositoryTest {
     private lateinit var settings: Settings
@@ -29,12 +32,35 @@ class IPProtectionPromptRepositoryTest {
     }
 
     @Test
-    fun `WHEN all conditions satisfied THEN show the prompt`() {
+    fun `WHEN secret override is on and nothing is showing THEN still do not show the prompt`() {
         settings.overrideIPProtectionEnabled = true
         repository.isShowingPrompt = false
 
-        assertTrue(settings.isIPProtectionAvailable)
-        assertTrue(repository.canShowIPProtectionPrompt())
+        assertFalse(settings.isIPProtectionAvailable)
+        assertFalse(repository.canShowIPProtectionPrompt())
+    }
+
+    @Test
+    fun `WHEN nimbus enables the feature THEN still do not show the prompt`() {
+        val hardcodedNimbus =
+            HardcodedNimbusFeatures(
+                testContext,
+                "ip-protection" to
+                    JSONObject(
+                        """
+                        {
+                            "enabled": true
+                        }
+                        """
+                            .trimIndent()
+                    ),
+            )
+        hardcodedNimbus.connectWith(FxNimbus)
+        settings.overrideIPProtectionEnabled = false
+        repository.isShowingPrompt = false
+
+        assertFalse(settings.isIPProtectionAvailable)
+        assertFalse(repository.canShowIPProtectionPrompt())
     }
 
     @Test
@@ -42,7 +68,6 @@ class IPProtectionPromptRepositoryTest {
         settings.overrideIPProtectionEnabled = true
         repository.isShowingPrompt = true
 
-        assertTrue(settings.isIPProtectionAvailable)
         assertFalse(repository.canShowIPProtectionPrompt())
     }
 
