@@ -64,6 +64,7 @@ import org.mozilla.fenix.ext.getPreferenceKey
 import org.mozilla.fenix.home.pocket.ContentRecommendationsFeatureHelper
 import org.mozilla.fenix.home.topsites.FenixDefaultTopSitesProvider
 import org.mozilla.fenix.home.topsites.TopSitesConfigConstants.TOP_SITES_MAX_COUNT
+import org.mozilla.fenix.ipprotection.store.FenixIPProtectionEligibilityStorage
 import org.mozilla.fenix.nimbus.DefaultBrowserPrompt
 import org.mozilla.fenix.nimbus.FxNimbus
 import org.mozilla.fenix.nimbus.HomeScreenSection
@@ -2985,9 +2986,14 @@ class Settings(
      * Indicates if the IPProtection feature is available for the user.
      *
      * The flag is backed by a Nimbus `ip-protection` feature, with an option to override it through secret settings.
+     *
+     * lavalynx: always `false`. IP Protection (Mozilla VPN) is never offered; see
+     * [org.mozilla.fenix.ipprotection.store.FenixIPProtectionEligibilityStorage.IP_PROTECTION_DISABLED].
      */
     val isIPProtectionAvailable: Boolean
-        get() = FxNimbus.features.ipProtection.value().enabled || overrideIPProtectionEnabled
+        get() =
+            !FenixIPProtectionEligibilityStorage.IP_PROTECTION_DISABLED &&
+                (FxNimbus.features.ipProtection.value().enabled || overrideIPProtectionEnabled)
 
     /**
      * Tracks how many times the summarize menu item has been shown. Used to control highlight/badge visibility for

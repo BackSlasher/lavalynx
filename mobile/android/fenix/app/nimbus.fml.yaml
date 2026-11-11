@@ -1110,17 +1110,17 @@ features:
     description: Feature to enable IP Protection (VPN) for users on Firefox on Android.
     variables:
       enabled:
-        description: If true, IP Protection feature is enabled.
+        description: "If true, IP Protection feature is enabled. (lavalynx: off; also hard-disabled in code.)"
         type: Boolean
-        default: true
+        default: false
       show-beta-badge:
         description: If true, a BETA badge is shown next to the IP Protection entry in the settings list.
         type: Boolean
         default: true
       show-onboarding-bottom-sheet:
-        description: If true, the IP Protection onboarding bottom sheet is shown to the user.
+        description: "If true, the IP Protection onboarding bottom sheet is shown to the user. (lavalynx: off.)"
         type: Boolean
-        default: true
+        default: false
       data-limit-gigabyte:
         description: Specifies the VPN data limit for unpaid users in GB (e.g. 50 GB).
         type: Int

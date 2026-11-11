@@ -44,6 +44,10 @@ class FenixIPProtectionEligibilityStorage(
                 val nimbus = FxNimbus.features.ipProtection.value()
                 val status =
                     when {
+                        // lavalynx: IP Protection (Mozilla VPN) is never offered, regardless of Nimbus, region or the
+                        // secret-settings override. Forcing Ineligible hides the menu item, settings entry, trust panel
+                        // row and onboarding prompts, and keeps the proxy service uninitialized.
+                        IP_PROTECTION_DISABLED -> EligibilityStatus.Ineligible
                         secretOverride -> EligibilityStatus.Eligible
                         !nimbus.enabled -> EligibilityStatus.Ineligible
                         region == null -> EligibilityStatus.Unknown
@@ -68,5 +72,15 @@ class FenixIPProtectionEligibilityStorage(
         sharedPref.registerOnSharedPreferenceChangeListener(owner = lifecycleOwner) { sharedPreferences, key ->
             onPreferenceChange(sharedPreferences, key)
         }
+    }
+
+    companion object {
+        /**
+         * lavalynx: hard kill switch for IP Protection (Mozilla VPN).
+         *
+         * Deliberately not a `const` so the compiler does not inline it and flag the branches below as constant
+         * conditions under `-Werror`.
+         */
+        @Suppress("MayBeConst") val IP_PROTECTION_DISABLED: Boolean = true
     }
 }
