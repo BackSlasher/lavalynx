@@ -23,6 +23,7 @@ import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
 import mozilla.components.support.base.log.logger.Logger
 import mozilla.components.support.utils.DateTimeProvider
 import mozilla.components.support.utils.DefaultDateTimeProvider
+import org.mozilla.fenix.FeatureFlags
 import org.mozilla.fenix.R
 import org.mozilla.fenix.ext.components
 import org.mozilla.fenix.ipprotection.store.IPProtectionOnboardingPrompt
@@ -139,7 +140,10 @@ class ContinuousOnboardingFeature(
             ContinuousOnboardingStage.DAY_3 -> maybeRequestDefaultBrowserRole(stage)
 
             ContinuousOnboardingStage.DAY_5 ->
-                if (!settings.signedInFxaAccount) {
+                if (!FeatureFlags.SYNC_UI_ENABLED) {
+                    // lavalynx: no sync nudge; just move past this stage.
+                    markStageCompleted(stage)
+                } else if (!settings.signedInFxaAccount) {
                     showSyncCardDialog()
                 } else {
                     telemetryRecorder.onOnboardingComplete(

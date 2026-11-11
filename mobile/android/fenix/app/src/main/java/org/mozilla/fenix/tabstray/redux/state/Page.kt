@@ -4,6 +4,8 @@
 
 package org.mozilla.fenix.tabstray.redux.state
 
+import org.mozilla.fenix.FeatureFlags
+
 /** The different pages in the Tab Manager. */
 enum class Page {
 
@@ -30,7 +32,7 @@ enum class Page {
                 PrivateTabs,
                 NormalTabs,
                 TabGroups.takeIf { shouldShowTabGroupsPage },
-                SyncedTabs,
+                SyncedTabs.takeIf { FeatureFlags.SYNC_UI_ENABLED },
             )
 
         /**
@@ -44,7 +46,9 @@ enum class Page {
                 position == 0 -> PrivateTabs
                 position == 1 -> NormalTabs
                 shouldShowTabGroupsPage && position == 2 -> TabGroups
-                else -> SyncedTabs
+                FeatureFlags.SYNC_UI_ENABLED -> SyncedTabs
+                // lavalynx: with the Synced Tabs page hidden, fall back to the last visible page.
+                else -> visiblePages(shouldShowTabGroupsPage).last()
             }
         }
 

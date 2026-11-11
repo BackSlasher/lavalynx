@@ -13,6 +13,7 @@ import androidx.preference.SwitchPreferenceCompat
 import mozilla.components.concept.sync.SyncEngine
 import mozilla.components.feature.autofill.preference.AutofillPreference
 import mozilla.telemetry.glean.private.NoExtras
+import org.mozilla.fenix.FeatureFlags
 import org.mozilla.fenix.GleanMetrics.Logins
 import org.mozilla.fenix.R
 import org.mozilla.fenix.biometricauthentication.AuthenticationStatus
@@ -114,6 +115,8 @@ class SavedLoginsAuthFragment : PreferenceFragmentCompat(), SystemInsetsPaddedFr
                 findNavController().navigate(directions)
             },
         )
+        // lavalynx: no sync UI.
+        requirePreference<Preference>(R.string.pref_key_sync_logins).isVisible = FeatureFlags.SYNC_UI_ENABLED
 
         BiometricAuthenticationManager.biometricAuthenticationNeededInfo.shouldShowAuthenticationPrompt = true
         BiometricAuthenticationManager.biometricAuthenticationNeededInfo.authenticationStatus =

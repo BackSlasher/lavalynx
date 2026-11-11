@@ -5,6 +5,7 @@
 package org.mozilla.fenix.components.menu.configuration
 
 import androidx.annotation.VisibleForTesting
+import org.mozilla.fenix.FeatureFlags
 import org.mozilla.fenix.R
 import org.mozilla.fenix.components.appstate.SupportedMenuNotifications
 import org.mozilla.fenix.components.menu.CustomizedMenuInfo
@@ -195,7 +196,7 @@ object BrowserMenuConfiguration {
                 MenuSectionConfiguration(
                     id = ACCOUNTS_AND_SETTINGS_GROUP_ID,
                     presentationMode = Row,
-                    items = listOf(MozillaAccount, Settings),
+                    items = listOfNotNull(MozillaAccount.takeIf { FeatureFlags.SYNC_UI_ENABLED }, Settings),
                     name = R.string.browser_menu_section_accounts_and_settings,
                 ),
                 MenuSectionConfiguration(

@@ -156,12 +156,7 @@ class ChecklistItemTest {
                     icon = iconsR.drawable.mozac_ic_extension_24,
                     isCompleted = isCompleted,
                 ),
-                ChecklistItem.Task(
-                    type = ChecklistItem.Task.Type.SIGN_IN,
-                    title = R.string.setup_checklist_task_account_sync,
-                    icon = R.drawable.ic_fx_accounts_avatar,
-                    isCompleted = isCompleted,
-                ),
+                // lavalynx: no sign-in task.
             )
 
         assertEquals(expected, result)
@@ -194,13 +189,8 @@ class ChecklistItemTest {
                                 title = R.string.setup_checklist_task_default_browser,
                                 icon = iconsR.drawable.mozac_ic_globe_24,
                                 isCompleted = isCompleted,
-                            ),
-                            ChecklistItem.Task(
-                                type = ChecklistItem.Task.Type.SIGN_IN,
-                                title = R.string.setup_checklist_task_account_sync,
-                                icon = R.drawable.ic_fx_accounts_avatar,
-                                isCompleted = isCompleted,
-                            ),
+                            )
+                            // lavalynx: no sign-in task.
                         ),
                 ),
                 ChecklistItem.Group(
@@ -272,13 +262,8 @@ class ChecklistItemTest {
                                 title = R.string.setup_checklist_task_default_browser,
                                 icon = iconsR.drawable.mozac_ic_globe_24,
                                 isCompleted = isCompleted,
-                            ),
-                            ChecklistItem.Task(
-                                type = ChecklistItem.Task.Type.SIGN_IN,
-                                title = R.string.setup_checklist_task_account_sync,
-                                icon = R.drawable.ic_fx_accounts_avatar,
-                                isCompleted = isCompleted,
-                            ),
+                            )
+                            // lavalynx: no sign-in task.
                         ),
                 ),
                 ChecklistItem.Group(

@@ -32,6 +32,7 @@ import mozilla.components.service.nimbus.messaging.use
 import mozilla.components.support.base.feature.ViewBoundFeatureWrapper
 import mozilla.components.support.base.log.logger.Logger
 import mozilla.components.support.utils.Browsers
+import org.mozilla.fenix.FeatureFlags
 import org.mozilla.fenix.GleanMetrics.Pings
 import org.mozilla.fenix.R
 import org.mozilla.fenix.components.accounts.FenixFxAEntryPoint
@@ -102,7 +103,7 @@ class OnboardingFragment : Fragment() {
     private val pairingSyncPage by lazy {
         allOnboardingPages
             .find { it.type == OnboardingPageUiData.Type.SYNC_PAIRING }
-            ?.takeIf { requireComponents.settings.isPairingSignInPromptEnabled }
+            ?.takeIf { FeatureFlags.SYNC_UI_ENABLED && requireComponents.settings.isPairingSignInPromptEnabled }
     }
 
     private val pagesToDisplay by lazy {
