@@ -1,0 +1,166 @@
+#!/usr/bin/env bash
+#
+# lavalynx dev driver. Every command runs inside the build container;
+# the only things needed on the host are podman and this script.
+#
+#   lavalynx/dev image                 build/refresh the toolchain image
+#   lavalynx/dev bootstrap             one-off: JDK, Android SDK, python deps into the cache volume
+#   lavalynx/dev build                 ./mach build (fetch Gecko artifacts) + assemble the Nightly APK
+#   lavalynx/dev sign                  sign the assembled APK with .secrets/ -> obj-lavalynx/lavalynx/
+#   lavalynx/dev apk                   build + sign
+#   lavalynx/dev test <path...>        ./mach test on the given files/dirs (Fenix unit tests)
+#   lavalynx/dev lint                  fast formatter + detekt (./mach gradle ktfmtFormat detekt)
+#   lavalynx/dev mach <args...>        raw ./mach
+#   lavalynx/dev gradle <args...>      raw ./mach gradle
+#   lavalynx/dev shell                 interactive shell in the container
+#   lavalynx/dev install               sign + install the APK on the phone adb can see (host adb)
+#   lavalynx/dev tag                   tag the current commit for release and push the tag
+#   lavalynx/dev clean                 drop the objdir and the cache volumes
+#
+set -euo pipefail
+
+IMAGE=${LAVALYNX_IMAGE:-lavalynx-build}
+# This script lives in <repo>/lavalynx/, so the repo is one level up.
+ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+OBJDIR=obj-lavalynx
+APK_GLOB="$OBJDIR/gradle/build/mobile/android/fenix/app/outputs/apk/nightly/fenix-arm64-v8a-nightly*.apk"
+OUT_DIR="$OBJDIR/lavalynx"
+# Keystore and its passwords. In the repo so they travel with it and need no
+# extra mount, and in .gitignore so they are never committed or snapshotted by jj.
+SECRETS=${LAVALYNX_SECRETS:-$ROOT/.secrets}
+
+have_image() { podman image exists "$IMAGE"; }
+
+ensure_image() {
+  have_image || {
+    echo "==> toolchain image '$IMAGE' missing; building it once" >&2
+    build_image
+  }
+}
+
+build_image() {
+  podman build -t "$IMAGE" -f "$ROOT/lavalynx/Containerfile" "$ROOT/lavalynx"
+}
+
+# --userns=keep-id so build outputs land owned by the host user.
+# :U on the volumes so podman chowns them to that uid.
+# HOME points into a volume: mach keeps its state dir, uv/pip caches and the
+# Android SDK there, and Gradle keeps its own cache in a second volume.
+in_container() {
+  local tty=()
+  [[ -t 0 && -t 1 ]] && tty=(-it)
+  podman run --rm "${tty[@]}" \
+    --userns=keep-id \
+    --tmpfs /tmp:rw,exec,mode=1777 \
+    -e HOME=/cache/home \
+    -e ANDROID_USER_HOME=/cache/home/.android \
+    -e JAVA_TOOL_OPTIONS=-Duser.home=/cache/home \
+    -e MOZBUILD_STATE_PATH=/cache/mozbuild \
+    -e GRADLE_USER_HOME=/cache/gradle \
+    -e MOZCONFIG=/work/lavalynx/mozconfig \
+    -v "$ROOT:/work:Z" \
+    -v lavalynx-home:/cache/home:U \
+    -v lavalynx-mozbuild:/cache/mozbuild:U \
+    -v lavalynx-gradle:/cache/gradle:U \
+    -w /work \
+    "$IMAGE" "$@"
+}
+
+# mach bootstrap installs the JDK and python deps; the Android SDK itself is a
+# configure-time "bootstrap toolchain" that ./mach build fetches on first use.
+ensure_bootstrapped() {
+  in_container bash -lc 'ls -d /cache/mozbuild/jdk/jdk-* >/dev/null 2>&1' || {
+    echo "==> toolchain not bootstrapped yet; doing it once" >&2
+    bootstrap
+  }
+}
+
+bootstrap() {
+  ensure_image
+  # Artifact mode: SDK + JDK + node + python deps, no NDK, no Rust.
+  # --no-system-changes: the image already has the apt packages; mach must not sudo.
+  in_container ./mach --no-interactive bootstrap \
+    --application-choice "GeckoView/Firefox for Android Artifact Mode" \
+    --no-system-changes
+}
+
+sign() {
+  [[ -f $SECRETS/keystore.properties ]] || {
+    echo "no signing material in $SECRETS; see lavalynx/README.md: Signing" >&2; exit 1; }
+  # Runs inside the container so apksigner and its JDK come from the bootstrapped SDK.
+  in_container bash -lc '
+    set -euo pipefail
+    shopt -s nullglob
+    apks=('"$APK_GLOB"')
+    [[ ${#apks[@]} -eq 1 ]] || { echo "expected exactly one arm64 nightly APK, found: ${apks[*]:-none}" >&2; exit 1; }
+    in=${apks[0]}
+    sdk=/cache/mozbuild/android-sdk-linux
+    apksigner=$(ls -d "$sdk"/build-tools/*/apksigner | sort -V | tail -1)
+    aapt2=$(ls -d "$sdk"/build-tools/*/aapt2 | sort -V | tail -1)
+    export JAVA_HOME=$(ls -d /cache/mozbuild/jdk/jdk-* | sort -V | tail -1)
+    export PATH=$JAVA_HOME/bin:$PATH
+    # keystore.properties: storeFile (relative to .secrets), storePassword, keyAlias, keyPassword
+    while IFS== read -r k v; do [[ $k =~ ^[A-Za-z]+$ ]] && declare "$k=$v"; done < .secrets/keystore.properties
+    badging=$("$aapt2" dump badging "$in")
+    vname=$(sed -n "s/.*versionName=\x27\([^\x27]*\)\x27.*/\1/p" <<<"$badging" | head -1)
+    vcode=$(sed -n "s/.*versionCode=\x27\([^\x27]*\)\x27.*/\1/p" <<<"$badging" | head -1)
+    mkdir -p '"$OUT_DIR"'
+    out='"$OUT_DIR"'/lavalynx-$vname-$vcode.apk
+    "$apksigner" sign --ks ".secrets/$storeFile" --ks-pass "pass:$storePassword" \
+      --ks-key-alias "$keyAlias" --key-pass "pass:$keyPassword" --out "$out" "$in"
+    "$apksigner" verify --print-certs "$out" | head -3
+    echo "==> $out"
+  '
+}
+
+cmd=${1:-build}
+shift || true
+
+case "$cmd" in
+  image)     build_image ;;
+
+  bootstrap) bootstrap ;;
+
+  build)     ensure_image; ensure_bootstrapped
+             in_container ./mach build
+             in_container ./mach gradle fenix:assembleNightly -PdisableDebugSigning=true
+             ls -1 $ROOT/$APK_GLOB 2>/dev/null || echo "no arm64 APK produced?" >&2 ;;
+
+  sign)      ensure_image; sign ;;
+
+  apk)       "$0" build; "$0" sign ;;
+
+  test)      ensure_image; ensure_bootstrapped; in_container ./mach test "$@" ;;
+
+  # fenix-scoped: the root tasks also want :focus-android, which the fenix-only
+  # subproject configuration in the mozconfig leaves out of the build.
+  lint)      ensure_image; ensure_bootstrapped; in_container ./mach gradle fenix:ktfmtFormat fenix:detekt ;;
+
+  mach)      ensure_image; ensure_bootstrapped; in_container ./mach "$@" ;;
+
+  gradle)    ensure_image; ensure_bootstrapped; in_container ./mach gradle "$@" ;;
+
+  shell)     ensure_image; in_container bash "$@" ;;
+
+  install)   "$0" sign
+             command -v adb >/dev/null || { echo "no adb on the host" >&2; exit 1; }
+             apk=$(ls -t "$ROOT/$OUT_DIR"/lavalynx-*.apk | head -1)
+             adb wait-for-device install -r -d "$apk"
+             echo "==> installed $(basename "$apk")" ;;
+
+  tag)       # Release tags are dates, so Obtainium sees them sort; the APK's own
+             # versionCode (hours since an epoch, set by Fenix's build) is what Android
+             # uses to decide what is an upgrade.
+             today=$(date -u +%Y.%m.%d)
+             n=$(git -C "$ROOT" tag -l "v$today*" | wc -l)
+             tag="v$today"; [[ $n -gt 0 ]] && tag="v$today.$((n + 1))"
+             echo "==> $tag at $(git -C "$ROOT" rev-parse --short HEAD)"
+             git -C "$ROOT" tag "$tag" HEAD
+             git -C "$ROOT" push origin "$tag" ;;
+
+  clean)     rm -rf "$ROOT/$OBJDIR"
+             podman volume rm -f lavalynx-home lavalynx-mozbuild lavalynx-gradle ;;
+
+  *)         sed -n '2,/^set -euo/p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//;/^set -euo/d'
+             exit 1 ;;
+esac

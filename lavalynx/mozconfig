@@ -1,0 +1,23 @@
+# lavalynx build configuration: Firefox for Android (Fenix), Android artifact mode.
+#
+# Artifact mode downloads the compiled Gecko (GeckoView native libraries and omni.ja)
+# that Mozilla's CI built for the nearest upstream commit, and compiles only the
+# Kotlin/Java side locally. lavalynx changes nothing below that line, so this is
+# both correct and an order of magnitude cheaper than a full build.
+#
+# Used with MOZCONFIG=lavalynx/mozconfig by lavalynx/dev and by the release workflow.
+
+ac_add_options --enable-project=mobile/android
+ac_add_options --enable-artifact-builds
+
+# Only the Fenix app and what it needs; skips Focus and the GeckoView examples.
+ac_add_options --enable-android-subproject=fenix
+
+# One ABI. The published artifacts are per-architecture, and so is the APK.
+ac_add_options --target=aarch64
+
+# The downloaded binaries come from Nightly builds of main, so say so.
+ac_add_options --enable-update-channel=nightly
+
+# Object directory inside the checkout (ignored by /obj*/ in .gitignore).
+mk_add_options MOZ_OBJDIR=@TOPSRCDIR@/obj-lavalynx
