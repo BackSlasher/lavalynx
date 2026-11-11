@@ -6,6 +6,8 @@
     <!-- Name of the application -->
     <string name="app_name" translatable="false">Firefox Fenix</string>
     <string name="firefox" translatable="false">Firefox</string>
+    <!-- lavalynx: label of the private "open with" target (IntentReceiverActivityPrivate alias). -->
+    <string name="lavalynx_open_target_private" translatable="false">Lavalynx (Private)</string>
 
     <!-- Preference for developers -->
     <string name="preference_leakcanary" translatable="false">LeakCanary</string>
