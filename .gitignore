@@ -39,6 +39,15 @@ ID
 # Filesystem temporaries
 .fuse_hidden*
 
+# lavalynx: APK signing key and its passwords. Ignored before the directory is
+# created so jj never snapshots it. Losing it means no future build can upgrade
+# an installed lavalynx; leaking it means rotating it, with the same cost.
+.secrets/
+# lavalynx: Android tooling state (debug keystore, analytics opt-out) that
+# ends up at the checkout root when the tools cannot resolve a home directory.
+/.android/
+/.m2/
+
 # Ignore Python .egg-info directories for first-party modules (but,
 # still add vendored packages' .egg-info directories)
 # lint-ignore-next-line: syntax-difference

@@ -115,7 +115,9 @@ android {
             pseudoLocalesEnabled = true
         }
         nightly releaseTemplate >> {
-            applicationIdSuffix ".fenix"
+            // lavalynx: its own package name, so it installs next to any Firefox channel instead of
+            // colliding with Firefox Nightly (org.mozilla.fenix). Upstream: ".fenix".
+            applicationIdSuffix ".lavalynx"
             buildConfigField "boolean", "USE_RELEASE_VERSIONING", "true"
             def deepLinkSchemeValue = "fenix-nightly"
             buildConfigField "String", "DEEP_LINK_SCHEME", "\"$deepLinkSchemeValue\""
