@@ -19,6 +19,7 @@ import mozilla.components.browser.state.search.SearchEngine
 import mozilla.components.browser.state.state.selectedOrDefaultPrivateSearchEngine
 import mozilla.components.browser.state.state.selectedOrDefaultSearchEngine
 import mozilla.components.support.ktx.android.view.hideKeyboard
+import org.mozilla.fenix.FeatureFlags
 import org.mozilla.fenix.R
 import org.mozilla.fenix.e2e.SystemInsetsPaddedFragment
 import org.mozilla.fenix.ext.components
@@ -47,7 +48,8 @@ class SearchEngineFragment : PreferenceFragmentCompat(), SystemInsetsPaddedFragm
         )
 
         requirePreference<SwitchPreferenceCompat>(R.string.pref_key_show_sponsored_suggestions).apply {
-            isVisible = context.components.settings.enableFxSuggest
+            // lavalynx: no sponsored suggestions, so no toggle for them.
+            isVisible = FeatureFlags.SPONSORED_CONTENT_ENABLED && context.components.settings.enableFxSuggest
         }
         requirePreference<SwitchPreferenceCompat>(R.string.pref_key_show_nonsponsored_suggestions).apply {
             isVisible = context.components.settings.enableFxSuggest
