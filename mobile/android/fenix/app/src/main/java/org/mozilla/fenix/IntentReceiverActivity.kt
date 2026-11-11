@@ -96,6 +96,11 @@ class IntentReceiverActivity : Activity() {
             // if PRIVATE_BROWSING_MODE is already set to true, honor that
             private = intent.getBooleanExtra(PRIVATE_BROWSING_MODE, false)
         }
+        if (!private) {
+            // lavalynx: launched through the "(Private)" open-with target, see the
+            // IntentReceiverActivityPrivate alias in the manifest.
+            private = isPrivateOpenTarget(componentName.className)
+        }
         intent.putExtra(PRIVATE_BROWSING_MODE, private)
         if (private) {
             Events.openedLink.record(Events.OpenedLinkExtra("PRIVATE"))
@@ -125,6 +130,14 @@ class IntentReceiverActivity : Activity() {
 
     /** Returns the configured Firefox Accounts server URL. */
     private fun fxaServerUrl(): String = FxaServer.config(this).server.contentUrl()
+
+    /**
+     * lavalynx: whether the activity was started through the private open-with target, an `activity-alias` of this
+     * activity whose class name ends in [PRIVATE_OPEN_TARGET_SUFFIX].
+     */
+    @VisibleForTesting
+    internal fun isPrivateOpenTarget(componentClassName: String?) =
+        componentClassName?.endsWith(PRIVATE_OPEN_TARGET_SUFFIX) == true
 
     private fun persistUriReadPermission(uri: Uri) {
         try {
@@ -226,6 +239,9 @@ private fun Intent.stripUnwantedFlags() {
 }
 
 private const val FXA_PAIRING_PATH = "/pair"
+
+/** lavalynx: class-name suffix of the private open-with `activity-alias` declared in the manifest. */
+private const val PRIVATE_OPEN_TARGET_SUFFIX = "IntentReceiverActivityPrivate"
 
 /**
  * Returns whether [uri] has the same origin as [fxaServerUrl] and the Firefox Accounts pairing path. [fxaServerUrl] is

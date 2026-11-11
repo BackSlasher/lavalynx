@@ -567,6 +567,47 @@
             android:supportsPictureInPicture="true"
             android:windowSoftInputMode="adjustResize|stateAlwaysHidden" />
 
+        <!--
+          lavalynx: a second "open with" target that opens the link in a private tab. Android
+          lists one entry per matching activity, so an alias of IntentReceiverActivity with the
+          same link filters gives a "Lavalynx (Private)" choice next to the normal one.
+          IntentReceiverActivity recognises being started through this alias by its class name.
+        -->
+        <activity-alias
+            android:name=".IntentReceiverActivityPrivate"
+            android:label="@string/lavalynx_open_target_private"
+            android:exported="true"
+            android:targetActivity=".IntentReceiverActivity">
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:mimeType="text/html" />
+                <data android:mimeType="text/plain" />
+                <data android:mimeType="application/xhtml+xml" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity-alias>
+
         <activity
             android:name=".IntentReceiverActivity"
             android:theme="@style/Theme.Transparent"

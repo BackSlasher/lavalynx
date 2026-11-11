@@ -353,6 +353,28 @@ class IntentReceiverActivityTest {
         assertEquals(HomeActivity::class.java.name, actualIntent.component?.className)
     }
 
+    // lavalynx: the "(Private)" open-with target is an activity-alias recognised by its class name.
+    @Test
+    fun `GIVEN the private open target alias WHEN checking the component THEN it is private`() {
+        val activity = Robolectric.buildActivity(IntentReceiverActivity::class.java, Intent()).get()
+
+        assertTrue(activity.isPrivateOpenTarget("org.mozilla.fenix.IntentReceiverActivityPrivate"))
+        assertFalse(activity.isPrivateOpenTarget("org.mozilla.fenix.IntentReceiverActivity"))
+        assertFalse(activity.isPrivateOpenTarget(null))
+    }
+
+    @Test
+    fun `GIVEN links open normally WHEN started through the real activity THEN the intent is not private`() {
+        every { settings.openLinksInAPrivateTab } returns false
+        val intent = Intent()
+        val activity = Robolectric.buildActivity(IntentReceiverActivity::class.java, intent).get()
+        attachMocks(activity)
+
+        activity.processIntent(intent)
+
+        assertFalse(intent.getBooleanExtra(HomeActivity.PRIVATE_BROWSING_MODE, false))
+    }
+
     @Test
     fun `GIVEN a pairing link intent WHEN processing the intent THEN pairingLinkOpened is recorded`() = runTest {
         val intent =
