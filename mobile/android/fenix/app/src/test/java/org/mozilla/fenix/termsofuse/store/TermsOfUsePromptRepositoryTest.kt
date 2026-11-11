@@ -11,6 +11,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mozilla.fenix.FeatureFlags
 import org.mozilla.fenix.utils.Settings
 import org.mozilla.fenix.utils.Settings.Companion.FIVE_DAYS_MS
 import org.mozilla.fenix.utils.Settings.Companion.THIRTY_SECONDS_MS
@@ -41,10 +42,10 @@ class TermsOfUsePromptRepositoryTest {
         repository.isShowingPrompt = false
 
         assertFalse(settings.hasAcceptedTermsOfService)
-        assertTrue(settings.isTermsOfUsePromptEnabled)
+        assertEquals(FeatureFlags.NAG_PROMPTS_ENABLED, settings.isTermsOfUsePromptEnabled)
         assertEquals(MAX_DISPLAY_COUNT - 1, settings.termsOfUsePromptDisplayedCount)
 
-        assertTrue(repository.canShowTermsOfUsePrompt())
+        assertEquals(FeatureFlags.NAG_PROMPTS_ENABLED, repository.canShowTermsOfUsePrompt())
     }
 
     @Test
@@ -55,7 +56,7 @@ class TermsOfUsePromptRepositoryTest {
         repository.isShowingPrompt = true
 
         assertFalse(settings.hasAcceptedTermsOfService)
-        assertTrue(settings.isTermsOfUsePromptEnabled)
+        assertEquals(FeatureFlags.NAG_PROMPTS_ENABLED, settings.isTermsOfUsePromptEnabled)
         assertEquals(MAX_DISPLAY_COUNT - 1, settings.termsOfUsePromptDisplayedCount)
 
         assertFalse(repository.canShowTermsOfUsePrompt())
@@ -69,7 +70,7 @@ class TermsOfUsePromptRepositoryTest {
         repository.isShowingPrompt = false
 
         assertTrue(settings.hasAcceptedTermsOfService)
-        assertTrue(settings.isTermsOfUsePromptEnabled)
+        assertEquals(FeatureFlags.NAG_PROMPTS_ENABLED, settings.isTermsOfUsePromptEnabled)
         assertEquals(MAX_DISPLAY_COUNT - 1, settings.termsOfUsePromptDisplayedCount)
 
         assertFalse(repository.canShowTermsOfUsePrompt())
@@ -97,7 +98,7 @@ class TermsOfUsePromptRepositoryTest {
         settings.termsOfUsePromptDisplayedCount = excessiveDisplayCount
 
         assertFalse(settings.hasAcceptedTermsOfService)
-        assertTrue(settings.isTermsOfUsePromptEnabled)
+        assertEquals(FeatureFlags.NAG_PROMPTS_ENABLED, settings.isTermsOfUsePromptEnabled)
         assertEquals(excessiveDisplayCount, settings.termsOfUsePromptDisplayedCount)
 
         assertFalse(repository.canShowTermsOfUsePrompt())

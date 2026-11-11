@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
+import org.mozilla.fenix.FeatureFlags
 import org.mozilla.fenix.summarization.SummarizationSettingsBinding
 import org.mozilla.fenix.utils.Settings
 
@@ -29,21 +30,25 @@ class FenixSummarizationFeatureConfiguration(
     override val showMenuItem: Boolean
         get() = canShowFeature
 
+    /** lavalynx: no highlights or CFR while [FeatureFlags.FEATURE_TIPS_ENABLED] is off. */
+    private val canShowFeatureTips: Boolean
+        get() = FeatureFlags.FEATURE_TIPS_ENABLED && canShowFeature
+
     override val shouldHighlightMenuItem: Boolean
-        get() = canShowFeature && settings.shakeToSummarizeMenuItemExposureCount.underMaxCount()
+        get() = canShowFeatureTips && settings.shakeToSummarizeMenuItemExposureCount.underMaxCount()
 
     override val shouldHighlightOverflowMenuItem: Boolean
-        get() = canShowFeature && settings.shakeToSummarizeMoreMenuItemInteractionCount.underMaxCount()
+        get() = canShowFeatureTips && settings.shakeToSummarizeMoreMenuItemInteractionCount.underMaxCount()
 
     override val shouldToolbarShowCfr: Boolean
-        get() = canShowFeature && !settings.shakeToSummarizeToolbarCfrShown
+        get() = canShowFeatureTips && !settings.shakeToSummarizeToolbarCfrShown
 
     /**
      * We determine if we should highlight the toolbar by checking the feature flags & checking the number of
      * interactions
      */
     val shouldHighlightToolbarMenuButton: Boolean
-        get() = canShowFeature && settings.shakeToSummarizeToolbarInteractionCount.underMaxCount()
+        get() = canShowFeatureTips && settings.shakeToSummarizeToolbarInteractionCount.underMaxCount()
 
     private val _toolbarMenuButtonHighlight = MutableStateFlow(shouldHighlightToolbarMenuButton)
     override val toolbarMenuButtonHighlight: Flow<Boolean>

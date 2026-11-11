@@ -49,6 +49,22 @@ object FeatureFlags {
     const val MARKETING_DATA_ENABLED = false
 
     /**
+     * lavalynx: whether the app may nag on its own: the default-browser prompts (the system dialog on cold start, the
+     * onboarding page, the main-menu banner and badge), the day 2-7 continuous onboarding (default-browser dialog,
+     * "Turn on notifications" card), the review prompt, the home setup checklist, the weekly privacy report
+     * notification, the Terms of Use re-prompt, the privacy notice banner and the Nimbus default for appending "Sent
+     * from Firefox" to WhatsApp shares. The manual Settings entries keep working.
+     */
+    const val NAG_PROMPTS_ENABLED = false
+
+    /**
+     * lavalynx: whether unsolicited feature tips are shown: contextual feature recommendations (inactive tabs, tab
+     * auto-close, open in app, email masks, tab swipe, shake to summarize), the private-tabs lock banner, the inactive
+     * tabs auto-close dialog, the tab groups onboarding card and the wallpaper onboarding sheet.
+     */
+    const val FEATURE_TIPS_ENABLED = false
+
+    /**
      * Disables the Onboarding feature for debug builds by default. Set this to `true` if you need to access the
      * Onboarding feature for development purposes.
      *

@@ -15,6 +15,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mozilla.fenix.FeatureFlags
 import org.mozilla.fenix.summarization.SummarizationSettingsBinding
 import org.mozilla.fenix.utils.Settings
 
@@ -90,15 +91,16 @@ class FenixSummarizationFeatureConfigurationTest {
     }
 
     @Test
-    fun `menu item is highlighted after menu item is exposed once`() {
+    fun `menu item is highlighted after menu item is exposed once if feature tips are on`() {
         testSettings.shakeToSummarizeFeatureFlagEnabled = true
         settingsBinding.isFeatureEnabledFlow.value = true
 
         // menu item is exposed once
         discoverySettings.cacheDiscoveryEvent(SummarizeDiscoveryEvent.MenuItemExposure)
 
-        assertTrue(
-            "Menu item should be highlighted after menu item is exposed once",
+        assertEquals(
+            "Menu item should be highlighted after menu item is exposed once only if feature tips are on",
+            FeatureFlags.FEATURE_TIPS_ENABLED,
             discoverySettings.shouldHighlightMenuItem,
         )
     }
@@ -176,13 +178,14 @@ class FenixSummarizationFeatureConfigurationTest {
     }
 
     @Test
-    fun `menu overflow is highlighted if the overflow menu item is not interacted with at all`() {
+    fun `menu overflow is highlighted if the overflow menu item is not interacted with at all and tips are on`() {
         // GIVEN the feature flag fully available
         testSettings.shakeToSummarizeFeatureFlagEnabled = true
         settingsBinding.isFeatureEnabledFlow.value = true
 
-        assertTrue(
+        assertEquals(
             "Menu overflow should be highlighted after the overflow menu item is not interacted with",
+            FeatureFlags.FEATURE_TIPS_ENABLED,
             discoverySettings.shouldHighlightOverflowMenuItem,
         )
     }
@@ -304,7 +307,7 @@ class FenixSummarizationFeatureConfigurationTest {
     }
 
     @Test
-    fun `toolbar cfr is shown if we have not shown it before`() {
+    fun `toolbar cfr is shown if we have not shown it before and feature tips are on`() {
         // GIVEN the feature flag fully available
         testSettings.shakeToSummarizeFeatureFlagEnabled = true
         settingsBinding.isFeatureEnabledFlow.value = true
@@ -312,8 +315,9 @@ class FenixSummarizationFeatureConfigurationTest {
         // AND we have not shown the flag before
         testSettings.shakeToSummarizeToolbarCfrShown = false
 
-        assertTrue(
+        assertEquals(
             "Toolbar CFR should be shown if it has not been shown before",
+            FeatureFlags.FEATURE_TIPS_ENABLED,
             discoverySettings.shouldToolbarShowCfr,
         )
     }

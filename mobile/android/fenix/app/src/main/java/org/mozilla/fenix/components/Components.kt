@@ -370,6 +370,7 @@ class Components(
                         SetupChecklistPreferencesMiddleware(DefaultSetupChecklistRepository(context, settings)),
                         SetupChecklistTelemetryMiddleware(),
                         ReviewPromptMiddleware(
+                                reviewPromptEnabled = FeatureFlags.NAG_PROMPTS_ENABLED,
                                 continuousOnboardingInProgress = {
                                     settings.continuousOnboardingFeatureEnabled &&
                                         !settings.continuousOnboardingCompleted

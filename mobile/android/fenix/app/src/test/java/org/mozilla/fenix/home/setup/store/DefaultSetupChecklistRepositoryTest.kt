@@ -15,6 +15,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mozilla.fenix.FeatureFlags
 import org.mozilla.fenix.R
 import org.mozilla.fenix.utils.Settings
 
@@ -110,7 +111,10 @@ class DefaultSetupChecklistRepositoryTest {
         val repository = DefaultSetupChecklistRepository(context = testContext, settings)
         repository.setPreference(SetupChecklistPreference.ShowSetupChecklist, true)
 
-        assertTrue(settings.showSetupChecklist)
+        assertTrue(
+            settings.preferences.getBoolean(testContext.getString(R.string.pref_key_setup_checklist_complete), false)
+        )
+        assertEquals(FeatureFlags.NAG_PROMPTS_ENABLED, settings.showSetupChecklist)
     }
 
     @Test

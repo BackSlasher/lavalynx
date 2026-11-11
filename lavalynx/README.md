@@ -19,6 +19,12 @@ and in a handful of marked `// lavalynx:` lines in the Kotlin.
   under Passwords and Autofill, the sign-in onboarding and setup-checklist steps,
   "Send to device" and the bookmarks sign-in prompt. The account machinery
   itself is untouched.
+- **No nags or feature tips.** `FeatureFlags.NAG_PROMPTS_ENABLED` and
+  `FEATURE_TIPS_ENABLED` are `false`, which removes the default-browser prompts,
+  the "turn on notifications" card, continuous onboarding, the review prompt,
+  the setup checklist, the weekly privacy report, Terms of Use re-prompts, the
+  privacy notice banner, CFR tooltips and onboarding cards. The matching
+  Settings entries still work.
 - **Its own package name and label.** The Nightly build type is
   `org.mozilla.lavalynx`, named "Lavalynx", so it installs next to any Firefox
   channel rather than colliding with Firefox Nightly.

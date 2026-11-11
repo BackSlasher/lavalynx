@@ -13,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.app.ActivityOptionsCompat
 import androidx.test.filters.SdkSuppress
+import io.mockk.every
+import io.mockk.spyk
 import kotlin.test.assertNotNull
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -76,7 +78,16 @@ class ContinuousOnboardingFeatureTest {
             IpProtection(promoDeadline = "2000-01-01", dataLimitGigabyte = 50)
         )
         activity = Robolectric.buildActivity(AppCompatActivity::class.java).create().get()
-        settings = Settings(testContext)
+        // lavalynx: the real setting is pinned off by FeatureFlags.NAG_PROMPTS_ENABLED; exercise the feature itself.
+        var continuousOnboardingEnabled = false
+        settings =
+            spyk(Settings(testContext)) {
+                every { continuousOnboardingFeatureEnabled } answers { continuousOnboardingEnabled }
+                every { continuousOnboardingFeatureEnabled = any() } answers
+                    {
+                        continuousOnboardingEnabled = firstArg()
+                    }
+            }
         telemetryRecorder =
             OnboardingTelemetryRecorder(
                 onboardingReason = OnboardingReason.NEW_USER,
