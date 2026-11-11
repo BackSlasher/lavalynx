@@ -7,6 +7,7 @@ package org.mozilla.fenix.onboarding
 import android.content.Context
 import androidx.annotation.VisibleForTesting
 import mozilla.components.support.utils.Browsers
+import org.mozilla.fenix.FeatureFlags
 import org.mozilla.fenix.ext.components
 import org.mozilla.fenix.ext.isDefaultBrowserPromptSupported
 import org.mozilla.fenix.nimbus.FxNimbus
@@ -54,7 +55,8 @@ class DefaultBrowserPromptManager(
 
     @VisibleForTesting
     internal fun canShowPrompt(): Boolean {
-        return FxNimbus.features.defaultBrowserPrompt.value().enabled &&
+        return FeatureFlags.NAG_PROMPTS_ENABLED &&
+            FxNimbus.features.defaultBrowserPrompt.value().enabled &&
             !storage.isDefaultBrowser &&
             storage.isDefaultBrowserPromptSupported &&
             !storage.promptToSetAsDefaultBrowserDisplayedInOnboarding

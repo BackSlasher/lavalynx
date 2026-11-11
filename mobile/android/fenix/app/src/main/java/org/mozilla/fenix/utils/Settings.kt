@@ -377,14 +377,19 @@ class Settings(
             default = 0L,
         )
 
+    /** lavalynx: always false while [FeatureFlags.FEATURE_TIPS_ENABLED] is off. */
     val canShowCfr: Boolean
-        get() = (currentTimeMillis() - lastCfrShownTimeInMillis) > THREE_DAYS_MS
+        get() = FeatureFlags.FEATURE_TIPS_ENABLED && (currentTimeMillis() - lastCfrShownTimeInMillis) > THREE_DAYS_MS
 
-    val cfrPopupsEnabled by
+    private val cfrPopupsEnabledPref by
         booleanPreference(
             appContext.getPreferenceKey(R.string.pref_cfr_popups_enabled),
             default = { FxNimbus.features.enablePopups.value().cfrPopupsEnabled },
         )
+
+    /** lavalynx: always false while [FeatureFlags.FEATURE_TIPS_ENABLED] is off. */
+    val cfrPopupsEnabled: Boolean
+        get() = FeatureFlags.FEATURE_TIPS_ENABLED && cfrPopupsEnabledPref
 
     val inAppMessagesEnabled by
         booleanPreference(
@@ -620,12 +625,22 @@ class Settings(
             default = true,
         )
 
-    /** Indicates if the wallpaper onboarding dialog should be shown. */
-    var showWallpaperOnboarding by
+    private var showWallpaperOnboardingPref by
         booleanPreference(
             key = appContext.getPreferenceKey(R.string.pref_key_wallpapers_onboarding),
             default = true,
         )
+
+    /**
+     * Indicates if the wallpaper onboarding dialog should be shown.
+     *
+     * lavalynx: always false while [FeatureFlags.FEATURE_TIPS_ENABLED] is off.
+     */
+    var showWallpaperOnboarding: Boolean
+        get() = FeatureFlags.FEATURE_TIPS_ENABLED && showWallpaperOnboardingPref
+        set(value) {
+            showWallpaperOnboardingPref = value
+        }
 
     var openLinksInAPrivateTab by
         booleanPreference(
@@ -670,11 +685,22 @@ class Settings(
             false,
         )
 
-    var shouldShowMenuBanner by
+    private var shouldShowMenuBannerPref by
         booleanPreference(
             key = appContext.getPreferenceKey(R.string.pref_key_show_menu_banner),
             default = true,
         )
+
+    /**
+     * Whether the main menu shows the "set as default browser" banner.
+     *
+     * lavalynx: always false while [FeatureFlags.NAG_PROMPTS_ENABLED] is off.
+     */
+    var shouldShowMenuBanner: Boolean
+        get() = FeatureFlags.NAG_PROMPTS_ENABLED && shouldShowMenuBannerPref
+        set(value) {
+            shouldShowMenuBannerPref = value
+        }
 
     var defaultSearchEngineName by
         stringPreference(
@@ -775,12 +801,22 @@ class Settings(
             default = { if (hasAcceptedTermsOfService) TOU_VERSION else 0 },
         )
 
-    /** Returns true if the terms of use feature flag is enabled */
-    var isTermsOfUsePromptEnabled by
+    private var isTermsOfUsePromptEnabledPref by
         booleanPreference(
             key = appContext.getPreferenceKey(R.string.pref_key_terms_prompt_enabled),
             default = { FxNimbus.features.termsOfUsePrompt.value().enabled },
         )
+
+    /**
+     * Returns true if the terms of use feature flag is enabled.
+     *
+     * lavalynx: always false while [FeatureFlags.NAG_PROMPTS_ENABLED] is off.
+     */
+    var isTermsOfUsePromptEnabled: Boolean
+        get() = FeatureFlags.NAG_PROMPTS_ENABLED && isTermsOfUsePromptEnabledPref
+        set(value) {
+            isTermsOfUsePromptEnabledPref = value
+        }
 
     /** Returns true if the nimbus flag for showing the terms of use drag handle is true. */
     var shouldShowTermsOfUsePromptDragHandle by
@@ -1219,10 +1255,11 @@ class Settings(
             }
         }
 
+    /** lavalynx: off unless the user turns it on while [FeatureFlags.NAG_PROMPTS_ENABLED] is off. */
     var whatsappLinkSharingEnabled by
         booleanPreference(
             key = appContext.getPreferenceKey(R.string.pref_key_link_sharing),
-            default = { FxNimbus.features.sentFromFirefox.value().enabled },
+            default = { FeatureFlags.NAG_PROMPTS_ENABLED && FxNimbus.features.sentFromFirefox.value().enabled },
         )
 
     var linkSharingSettingsSnackbarShown by
@@ -1414,11 +1451,18 @@ class Settings(
             default = appContext.getString(R.string.remote_settings_server_prod),
         )
 
-    var shouldShowTabSwipeCFR by
+    private var shouldShowTabSwipeCFRPref by
         booleanPreference(
             appContext.getPreferenceKey(R.string.pref_key_toolbar_tab_swipe_cfr),
             default = false,
         )
+
+    /** lavalynx: always false while [FeatureFlags.FEATURE_TIPS_ENABLED] is off. */
+    var shouldShowTabSwipeCFR: Boolean
+        get() = FeatureFlags.FEATURE_TIPS_ENABLED && shouldShowTabSwipeCFRPref
+        set(value) {
+            shouldShowTabSwipeCFRPref = value
+        }
 
     var hasShownTabSwipeCFR by
         booleanPreference(
@@ -1850,11 +1894,18 @@ class Settings(
             default = true,
         )
 
-    var shouldShowLockPbmBanner by
+    private var shouldShowLockPbmBannerPref by
         booleanPreference(
             appContext.getPreferenceKey(R.string.pref_key_should_show_lock_pbm_banner),
             true,
         )
+
+    /** lavalynx: always false while [FeatureFlags.FEATURE_TIPS_ENABLED] is off. */
+    var shouldShowLockPbmBanner: Boolean
+        get() = FeatureFlags.FEATURE_TIPS_ENABLED && shouldShowLockPbmBannerPref
+        set(value) {
+            shouldShowLockPbmBannerPref = value
+        }
 
     var shouldShowInactiveTabsOnboardingPopup by
         booleanPreference(
@@ -1873,9 +1924,12 @@ class Settings(
      * Indicates if the auto-close dialog should be visible based on if the user has dismissed it before
      * [hasInactiveTabsAutoCloseDialogBeenDismissed], if the minimum number of tabs has been accumulated [numbersOfTabs]
      * and if the auto-close setting is already set to [closeTabsAfterOneMonth].
+     *
+     * lavalynx: always false while [FeatureFlags.FEATURE_TIPS_ENABLED] is off.
      */
     fun shouldShowInactiveTabsAutoCloseDialog(numbersOfTabs: Int): Boolean {
-        return !hasInactiveTabsAutoCloseDialogBeenDismissed &&
+        return FeatureFlags.FEATURE_TIPS_ENABLED &&
+            !hasInactiveTabsAutoCloseDialogBeenDismissed &&
             numbersOfTabs >= INACTIVE_TAB_MINIMUM_TO_SHOW_AUTO_CLOSE_DIALOG &&
             !closeTabsAfterOneMonth
     }
@@ -2493,12 +2547,22 @@ class Settings(
         onboardingCompletedTimestamp = currentTimeMillis()
     }
 
-    /** Indicates if the continuous onboarding feature is enabled. */
-    var continuousOnboardingFeatureEnabled by
+    private var continuousOnboardingFeatureEnabledPref by
         booleanPreference(
             key = appContext.getPreferenceKey(R.string.pref_key_continuous_onboarding_enabled),
             default = { FxNimbus.features.continuousOnboarding.value().enabled },
         )
+
+    /**
+     * Indicates if the continuous onboarding feature is enabled.
+     *
+     * lavalynx: always false while [FeatureFlags.NAG_PROMPTS_ENABLED] is off.
+     */
+    var continuousOnboardingFeatureEnabled: Boolean
+        get() = FeatureFlags.NAG_PROMPTS_ENABLED && continuousOnboardingFeatureEnabledPref
+        set(value) {
+            continuousOnboardingFeatureEnabledPref = value
+        }
 
     /**
      * Whether the Sync sign-in card can be shown during initial onboarding for users whose Firefox install is
@@ -2938,12 +3002,22 @@ class Settings(
             default = { FxNimbus.features.listenToPage.value().enabled },
         )
 
-    /** Nimbus controlled feature flag that indicates if the weekly privacy notification feature should be enabled. */
-    var weeklyPrivacyNotificationFeatureFlagEnabled by
+    private var weeklyPrivacyNotificationFeatureFlagEnabledPref by
         booleanPreference(
             key = appContext.getPreferenceKey(R.string.pref_key_enable_weekly_privacy_notification),
             default = { FxNimbus.features.weeklyPrivacyNotification.value().enabled },
         )
+
+    /**
+     * Nimbus controlled feature flag that indicates if the weekly privacy notification feature should be enabled.
+     *
+     * lavalynx: always false while [FeatureFlags.NAG_PROMPTS_ENABLED] is off.
+     */
+    var weeklyPrivacyNotificationFeatureFlagEnabled: Boolean
+        get() = FeatureFlags.NAG_PROMPTS_ENABLED && weeklyPrivacyNotificationFeatureFlagEnabledPref
+        set(value) {
+            weeklyPrivacyNotificationFeatureFlagEnabledPref = value
+        }
 
     /**
      * Debug-only switch to force the weekly privacy report notification to show, without needing real
@@ -3126,11 +3200,15 @@ class Settings(
             default = { FxNimbus.features.waybackMachine.value().enabled },
         )
 
-    /** Indicates if the Set as default Browser prompt should be displayed to the user. */
+    /**
+     * Indicates if the Set as default Browser prompt should be displayed to the user.
+     *
+     * lavalynx: always false while [FeatureFlags.NAG_PROMPTS_ENABLED] is off.
+     */
     fun shouldShowSetAsDefaultPrompt(
         nimbusFeature: DefaultBrowserPrompt = FxNimbus.features.defaultBrowserPrompt.value()
     ): Boolean {
-        if (!nimbusFeature.enabled) return false
+        if (!FeatureFlags.NAG_PROMPTS_ENABLED || !nimbusFeature.enabled) return false
 
         if (continuousOnboardingFeatureEnabled && !continuousOnboardingCompleted) return false
 
@@ -3330,8 +3408,7 @@ class Settings(
             default = { FxNimbus.features.suppressSponsoredTopSites.value().enabled },
         )
 
-    /** Indicates whether or not to show the checklist feature. */
-    var showSetupChecklist by
+    private var showSetupChecklistPref by
         booleanPreference(
             key = appContext.getPreferenceKey(R.string.pref_key_setup_checklist_complete),
             default = {
@@ -3339,6 +3416,17 @@ class Settings(
                     canShowAddSearchWidgetPrompt(AppWidgetManager.getInstance(appContext))
             },
         )
+
+    /**
+     * Indicates whether or not to show the checklist feature.
+     *
+     * lavalynx: always false while [FeatureFlags.NAG_PROMPTS_ENABLED] is off.
+     */
+    var showSetupChecklist: Boolean
+        get() = FeatureFlags.NAG_PROMPTS_ENABLED && showSetupChecklistPref
+        set(value) {
+            showSetupChecklistPref = value
+        }
 
     /** Distribution ID that represents if the app was installed via a distribution deal */
     var distributionId by
@@ -3375,12 +3463,22 @@ class Settings(
             default = { DefaultTabManagementFeatureHelper.tabGroupsLiveReorderEnabled },
         )
 
-    /** Whether onboarding is enabled for the Tab Groups feature. */
-    var tabGroupsOnboardingEnabled by
+    private var tabGroupsOnboardingEnabledPref by
         booleanPreference(
             key = appContext.getPreferenceKey(R.string.pref_key_tab_groups_onboarding),
             default = { DefaultTabManagementFeatureHelper.tabGroupsOnboardingEnabled },
         )
+
+    /**
+     * Whether onboarding is enabled for the Tab Groups feature.
+     *
+     * lavalynx: always false while [FeatureFlags.FEATURE_TIPS_ENABLED] is off.
+     */
+    var tabGroupsOnboardingEnabled: Boolean
+        get() = FeatureFlags.FEATURE_TIPS_ENABLED && tabGroupsOnboardingEnabledPref
+        set(value) {
+            tabGroupsOnboardingEnabledPref = value
+        }
 
     /** Whether the Tab Groups strip is shown while the active tab is in a group. */
     var tabGroupsStripEnabled by

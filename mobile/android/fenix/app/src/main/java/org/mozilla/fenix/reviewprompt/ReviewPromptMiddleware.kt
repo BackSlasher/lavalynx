@@ -27,6 +27,7 @@ private const val REVIEW_PROMPT_SHOWN_NIMBUS_EVENT_ID = "review_prompt_shown"
 /**
  * [Middleware] evaluating the triggers to show a review prompt.
  *
+ * @param reviewPromptEnabled If false the prompt is never shown.
  * @param continuousOnboardingInProgress If true then the prompt should not be shown.
  * @param shouldShowCustomPrompt If true enables showing custom prompt UI, if false falls back to Play Store prompt.
  * @param disableCustomPrompt Update settings to disable the custom prompt UI.
@@ -37,6 +38,7 @@ private const val REVIEW_PROMPT_SHOWN_NIMBUS_EVENT_ID = "review_prompt_shown"
  * @param nimbusEventStore [NimbusEventStore] used to record events evaluated in JEXL expressions.
  */
 class ReviewPromptMiddleware(
+    private val reviewPromptEnabled: Boolean = true,
     private val continuousOnboardingInProgress: () -> Boolean = { false },
     private val shouldShowCustomPrompt: () -> Boolean,
     private val disableCustomPrompt: () -> Unit,
@@ -94,7 +96,7 @@ class ReviewPromptMiddleware(
         // HomeFragment.onStart(), and continuous onboarding can complete while its last stage is still on screen, so
         // set the state to not eligible instead of leaving it unknown.
         // The state lives as long as the app process, so the prompt is only re-evaluated on the next cold start.
-        if (continuousOnboardingInProgress()) {
+        if (!reviewPromptEnabled || continuousOnboardingInProgress()) {
             store.dispatch(DoNotShowReviewPrompt)
             return
         }

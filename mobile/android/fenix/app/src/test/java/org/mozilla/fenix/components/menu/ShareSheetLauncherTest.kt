@@ -208,7 +208,7 @@ class ShareSheetLauncherTest {
 
     @Config(sdk = [34])
     @Test
-    fun `GIVEN API 34 and valid id WHEN native share sheet triggered THEN four chooser actions are passed`() {
+    fun `GIVEN API 34 and valid id WHEN native share sheet triggered THEN three chooser actions are passed`() {
         val actionsSlot = slot<Array<ChooserAction>>()
         every { mockShareDelegate.shareWithChooserActions(any(), any(), capture(actionsSlot)) } just runs
 
@@ -218,12 +218,12 @@ class ShareSheetLauncherTest {
             title = "Mozilla",
         )
 
-        assertEquals(4, actionsSlot.captured.size)
+        assertEquals(3, actionsSlot.captured.size)
     }
 
     @Config(sdk = [34])
     @Test
-    fun `GIVEN QR code generation fails WHEN native share sheet triggered THEN remaining 3 chooser actions are still passed`() {
+    fun `GIVEN QR code generation fails WHEN native share sheet triggered THEN remaining 2 chooser actions are still passed`() {
         every { mockQRCodeGenerator.generateQRCodeImage(any(), any(), any(), any()) } throws
             WriterException("Data too big")
         val actionsSlot = slot<Array<ChooserAction>>()
@@ -236,7 +236,7 @@ class ShareSheetLauncherTest {
         )
 
         verify { mockShareDelegate.shareWithChooserActions(any(), any(), any()) }
-        assertEquals(3, actionsSlot.captured.size)
+        assertEquals(2, actionsSlot.captured.size)
     }
 
     @Config(sdk = [34])
@@ -277,7 +277,7 @@ class ShareSheetLauncherTest {
 
     @Config(sdk = [34])
     @Test
-    fun `WHEN showSystemShareSheet is called with multiple items THEN only the send-to-devices chooser action is passed`() {
+    fun `WHEN showSystemShareSheet is called with multiple items THEN no chooser actions are passed`() {
         val actionsSlot = slot<Array<ChooserAction>>()
         every { mockShareDelegate.shareWithChooserActions(any(), any(), capture(actionsSlot)) } just runs
         val items =
@@ -288,7 +288,7 @@ class ShareSheetLauncherTest {
 
         launcher.showSystemShareSheet(items = items)
 
-        assertEquals(1, actionsSlot.captured.size)
+        assertEquals(0, actionsSlot.captured.size)
     }
 
     @Config(sdk = [34])

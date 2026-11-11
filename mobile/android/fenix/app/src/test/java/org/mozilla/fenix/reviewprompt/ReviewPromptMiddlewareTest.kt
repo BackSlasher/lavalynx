@@ -200,6 +200,39 @@ class ReviewPromptMiddlewareTest {
     }
 
     @Test
+    fun `GIVEN review prompt disabled WHEN check requested THEN sets not eligible without checking criteria`() {
+        var criteriaChecked = false
+        mainCriteria = sequence {
+            criteriaChecked = true
+            yield(true)
+        }
+        subCriteria = sequenceOf(true)
+        val disabledStore =
+            AppStore(
+                middlewares =
+                    listOf(
+                        ReviewPromptMiddleware(
+                            reviewPromptEnabled = false,
+                            shouldShowCustomPrompt = { true },
+                            disableCustomPrompt = {},
+                            createJexlHelper = { error("JEXL helper should not be created") },
+                            buildTriggerMainCriteria = { mainCriteria },
+                            buildTriggerSubCriteria = { subCriteria },
+                            nimbusEventStore = eventStore,
+                        )
+                    )
+            )
+
+        disabledStore.dispatch(ReviewPromptAction.CheckIfEligibleForReviewPrompt)
+
+        assertFalse(criteriaChecked)
+        assertEquals(
+            AppState(reviewPrompt = ReviewPromptState.NotEligible),
+            disabledStore.state,
+        )
+    }
+
+    @Test
     fun `GIVEN check ran while continuous onboarding in progress WHEN onboarding completes AND check requested again THEN stays not eligible`() {
         continuousOnboardingInProgress = true
         mainCriteria = sequenceOf(true)

@@ -380,11 +380,11 @@ class OnboardingCompletionStateMigrationTest {
 
     // endregion
 
-    /** Mirrors the `continuousOnboardingInProgress` lambda wired up in [org.mozilla.fenix.components.Components]. */
-    private fun continuousOnboardingInProgress(): Boolean {
-        val continuousOnboardingCompleted = settings.seventhDayOnboardingCompletedTimestamp != -1L
-        return settings.continuousOnboardingFeatureEnabled && !continuousOnboardingCompleted
-    }
+    /**
+     * Mirrors the `continuousOnboardingInProgress` lambda wired up in [org.mozilla.fenix.components.Components], with
+     * continuous onboarding enabled. lavalynx: the real setting is pinned off by `FeatureFlags.NAG_PROMPTS_ENABLED`.
+     */
+    private fun continuousOnboardingInProgress(): Boolean = settings.seventhDayOnboardingCompletedTimestamp == -1L
 
     private fun assertAllOnboardingTimestampsEqual() {
         assertEquals(ONBOARDING_COMPLETION_BACKFILL_TIMESTAMP_MILLIS, settings.onboardingCompletedTimestamp)

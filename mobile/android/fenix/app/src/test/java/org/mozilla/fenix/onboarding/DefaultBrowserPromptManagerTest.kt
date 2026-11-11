@@ -3,11 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 package org.mozilla.fenix.onboarding
 
+import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
-import junit.framework.TestCase.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mozilla.fenix.FeatureFlags
 import org.mozilla.fenix.nimbus.DefaultBrowserPrompt
 import org.mozilla.fenix.nimbus.FxNimbus.features
 import org.mozilla.fenix.onboarding.view.OnboardingPageUiData
@@ -72,7 +73,7 @@ class DefaultBrowserPromptManagerTest {
 
     @Test
     fun `WHEN we can show prompt THEN only the set to default card shows the prompt`() {
-        assertTrue(promptShownFor(defaultBrowserPageUiData))
+        assertEquals(FeatureFlags.NAG_PROMPTS_ENABLED, promptShownFor(defaultBrowserPageUiData))
         assertFalse(promptShownFor(syncPageUiData))
         assertFalse(promptShownFor(termsOfServicePageUiData))
     }
@@ -102,7 +103,18 @@ class DefaultBrowserPromptManagerTest {
 
         promptManager.maybePromptToSetAsDefaultBrowser(defaultBrowserPageUiData)
 
-        assertTrue(storage.promptToSetAsDefaultBrowserDisplayedInOnboarding)
+        assertEquals(FeatureFlags.NAG_PROMPTS_ENABLED, storage.promptToSetAsDefaultBrowserDisplayedInOnboarding)
+    }
+
+    @Test
+    fun `WHEN nag prompts are disabled THEN the prompt can not be shown`() {
+        val promptManager =
+            DefaultBrowserPromptManager(
+                storage = buildStorage(),
+                promptToSetAsDefaultBrowser = {},
+            )
+
+        assertEquals(FeatureFlags.NAG_PROMPTS_ENABLED, promptManager.canShowPrompt())
     }
 
     private fun promptShownFor(currentCard: OnboardingPageUiData): Boolean {
@@ -113,7 +125,7 @@ class DefaultBrowserPromptManagerTest {
                 promptToSetAsDefaultBrowser = { promptToSetAsDefaultBrowserCalled = true },
             )
 
-        assertTrue(promptManager.canShowPrompt())
+        assertEquals(FeatureFlags.NAG_PROMPTS_ENABLED, promptManager.canShowPrompt())
 
         promptManager.maybePromptToSetAsDefaultBrowser(currentCard)
 

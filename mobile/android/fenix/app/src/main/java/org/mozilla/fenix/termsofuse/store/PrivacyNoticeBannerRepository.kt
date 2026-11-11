@@ -4,6 +4,7 @@
 
 package org.mozilla.fenix.termsofuse.store
 
+import org.mozilla.fenix.FeatureFlags
 import org.mozilla.fenix.termsofuse.TOU_TIME_IN_MILLIS
 import org.mozilla.fenix.utils.Settings
 
@@ -12,7 +13,7 @@ interface PrivacyNoticeBannerRepository {
     /** Updates the preference that tracks the last time the user saw the Privacy Notice banner. */
     fun updatePrivacyNoticeBannerDisplayedPreference()
 
-    /** Determines if the Privacy Notice banner should be shown. */
+    /** Determines if the Privacy Notice banner should be shown. lavalynx: never while nag prompts are off. */
     fun shouldShowPrivacyNoticeBanner(): Boolean
 }
 
@@ -32,7 +33,8 @@ class DefaultPrivacyNoticeBannerRepository(
             } else {
                 TOU_TIME_IN_MILLIS
             }
-        return settings.hasAcceptedTermsOfService &&
+        return FeatureFlags.NAG_PROMPTS_ENABLED &&
+            settings.hasAcceptedTermsOfService &&
             settings.termsOfUseAcceptedTimeInMillis < termsOfUseTime &&
             settings.privacyNoticeBannerLastDisplayedTimeInMillis < termsOfUseTime
     }

@@ -22,6 +22,7 @@ import mozilla.components.support.test.robolectric.testContext
 import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mozilla.fenix.FeatureFlags
 import org.mozilla.fenix.addons.ExtensionsMenuItemProvider
 import org.mozilla.fenix.bookmarks.BookmarkMenuItemProvider
 import org.mozilla.fenix.bookmarks.BookmarksScreenMenuItemProvider
@@ -103,7 +104,7 @@ class MenuItemProvidersFactoryTest {
 
         val shown = registry.providers.filterValues { it.itemsFlow.value.isNotEmpty() }.keys
         assertEquals(
-            listOf(
+            listOfNotNull(
                 FenixMenuItem.DefaultBrowserBanner,
                 FenixMenuItem.IPProtection,
                 FenixMenuItem.Extensions,
@@ -111,7 +112,7 @@ class MenuItemProvidersFactoryTest {
                 FenixMenuItem.Bookmarks,
                 FenixMenuItem.Downloads,
                 FenixMenuItem.Passwords,
-                FenixMenuItem.MozillaAccount,
+                FenixMenuItem.MozillaAccount.takeIf { FeatureFlags.SYNC_UI_ENABLED },
                 FenixMenuItem.CustomizeHomepage,
                 FenixMenuItem.Settings,
                 FenixMenuItem.Quit,

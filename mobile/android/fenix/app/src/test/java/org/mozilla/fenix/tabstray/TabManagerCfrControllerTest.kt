@@ -7,10 +7,10 @@ package org.mozilla.fenix.tabstray
 import mozilla.components.support.test.robolectric.testContext
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mozilla.fenix.FeatureFlags
 import org.mozilla.fenix.tabstray.data.createTab
 import org.mozilla.fenix.tabstray.redux.state.TabsTrayState
 import org.mozilla.fenix.tabstray.redux.store.TabsTrayStore
@@ -112,6 +112,6 @@ class TabManagerCfrControllerTest {
 
         cfrController.maybeMarkTabSwipeCfrReady(adjacentTab)
 
-        assertTrue(settings.shouldShowTabSwipeCFR)
+        assertEquals(FeatureFlags.FEATURE_TIPS_ENABLED, settings.shouldShowTabSwipeCFR)
     }
 }

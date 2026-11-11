@@ -29,6 +29,7 @@ import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mozilla.fenix.FeatureFlags
 import org.mozilla.fenix.R
 import org.mozilla.fenix.browser.browsingmode.BrowsingMode
 import org.mozilla.fenix.components.toolbar.ToolbarPosition
@@ -170,11 +171,39 @@ class SettingsTest {
     }
 
     @Test
+    fun `nag prompts follow the lavalynx kill switch even when their prefs are on`() {
+        settings.shouldShowMenuBanner = true
+        settings.continuousOnboardingFeatureEnabled = true
+        settings.showSetupChecklist = true
+        settings.weeklyPrivacyNotificationFeatureFlagEnabled = true
+        settings.isTermsOfUsePromptEnabled = true
+
+        assertEquals(FeatureFlags.NAG_PROMPTS_ENABLED, settings.shouldShowMenuBanner)
+        assertEquals(FeatureFlags.NAG_PROMPTS_ENABLED, settings.continuousOnboardingFeatureEnabled)
+        assertEquals(FeatureFlags.NAG_PROMPTS_ENABLED, settings.showSetupChecklist)
+        assertEquals(FeatureFlags.NAG_PROMPTS_ENABLED, settings.weeklyPrivacyNotificationFeatureFlagEnabled)
+        assertEquals(FeatureFlags.NAG_PROMPTS_ENABLED, settings.isTermsOfUsePromptEnabled)
+    }
+
+    @Test
+    fun `feature tips follow the lavalynx kill switch even when their prefs are on`() {
+        settings.shouldShowTabSwipeCFR = true
+        settings.shouldShowLockPbmBanner = true
+        settings.tabGroupsOnboardingEnabled = true
+        settings.showWallpaperOnboarding = true
+
+        assertEquals(FeatureFlags.FEATURE_TIPS_ENABLED, settings.shouldShowTabSwipeCFR)
+        assertEquals(FeatureFlags.FEATURE_TIPS_ENABLED, settings.shouldShowLockPbmBanner)
+        assertEquals(FeatureFlags.FEATURE_TIPS_ENABLED, settings.tabGroupsOnboardingEnabled)
+        assertEquals(FeatureFlags.FEATURE_TIPS_ENABLED, settings.showWallpaperOnboarding)
+    }
+
+    @Test
     fun canShowCfrTest() {
         // When just created
         // Then
         assertEquals(0L, settings.lastCfrShownTimeInMillis)
-        assertTrue(settings.canShowCfr)
+        assertEquals(FeatureFlags.FEATURE_TIPS_ENABLED, settings.canShowCfr)
 
         // When
         settings.lastCfrShownTimeInMillis = System.currentTimeMillis()
@@ -831,7 +860,7 @@ class SettingsTest {
         every { settings.closeTabsAfterOneMonth } returns false
         every { settings.hasInactiveTabsAutoCloseDialogBeenDismissed } returns false
 
-        assertTrue(settings.shouldShowInactiveTabsAutoCloseDialog(20))
+        assertEquals(FeatureFlags.FEATURE_TIPS_ENABLED, settings.shouldShowInactiveTabsAutoCloseDialog(20))
     }
 
     @Test
@@ -1245,7 +1274,7 @@ class SettingsTest {
         settings.coldStartsBetweenSetAsDefaultPrompts = 5 // More than required cold starts
         settings.seventhDayOnboardingCompletedTimestamp = 1L
 
-        assertTrue(settings.shouldShowSetAsDefaultPrompt())
+        assertEquals(FeatureFlags.NAG_PROMPTS_ENABLED, settings.shouldShowSetAsDefaultPrompt())
     }
 
     @Test
@@ -1265,7 +1294,10 @@ class SettingsTest {
         settings.coldStartsBetweenSetAsDefaultPrompts = 5
         settings.seventhDayOnboardingCompletedTimestamp = 1L
 
-        assertTrue(settings.shouldShowSetAsDefaultPrompt(DefaultBrowserPrompt(daysBetweenPrompts = null)))
+        assertEquals(
+            FeatureFlags.NAG_PROMPTS_ENABLED,
+            settings.shouldShowSetAsDefaultPrompt(DefaultBrowserPrompt(daysBetweenPrompts = null)),
+        )
     }
 
     @Test
@@ -1275,7 +1307,10 @@ class SettingsTest {
         settings.coldStartsBetweenSetAsDefaultPrompts = 5
         settings.seventhDayOnboardingCompletedTimestamp = 1L
 
-        assertTrue(settings.shouldShowSetAsDefaultPrompt(DefaultBrowserPrompt(maxPromptsShown = null)))
+        assertEquals(
+            FeatureFlags.NAG_PROMPTS_ENABLED,
+            settings.shouldShowSetAsDefaultPrompt(DefaultBrowserPrompt(maxPromptsShown = null)),
+        )
     }
 
     @Test
@@ -1285,7 +1320,10 @@ class SettingsTest {
         settings.coldStartsBetweenSetAsDefaultPrompts = 0
         settings.seventhDayOnboardingCompletedTimestamp = 1L
 
-        assertTrue(settings.shouldShowSetAsDefaultPrompt(DefaultBrowserPrompt(coldStartsBetweenPrompts = null)))
+        assertEquals(
+            FeatureFlags.NAG_PROMPTS_ENABLED,
+            settings.shouldShowSetAsDefaultPrompt(DefaultBrowserPrompt(coldStartsBetweenPrompts = null)),
+        )
     }
 
     @Test
@@ -1307,7 +1345,7 @@ class SettingsTest {
         settings.continuousOnboardingFeatureEnabled = false
         settings.seventhDayOnboardingCompletedTimestamp = -1L
 
-        assertTrue(settings.shouldShowSetAsDefaultPrompt())
+        assertEquals(FeatureFlags.NAG_PROMPTS_ENABLED, settings.shouldShowSetAsDefaultPrompt())
     }
 
     @Test

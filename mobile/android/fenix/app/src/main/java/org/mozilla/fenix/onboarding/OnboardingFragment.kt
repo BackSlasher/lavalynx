@@ -122,7 +122,9 @@ class OnboardingFragment : Fragment() {
             .toMutableStateList()
     }
 
-    private fun displayDefaultBrowserPage(context: Context): Boolean = isNotDefaultBrowser(context)
+    // lavalynx: no default-browser page; Settings still offers it.
+    private fun displayDefaultBrowserPage(context: Context): Boolean =
+        FeatureFlags.NAG_PROMPTS_ENABLED && isNotDefaultBrowser(context)
 
     private val telemetryRecorder by lazy {
         OnboardingTelemetryRecorder(

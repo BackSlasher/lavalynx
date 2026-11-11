@@ -4,12 +4,14 @@
 
 package org.mozilla.fenix.termsofuse.store
 
+import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertFalse
 import junit.framework.TestCase.assertTrue
 import mozilla.components.support.test.robolectric.testContext
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mozilla.fenix.FeatureFlags
 import org.mozilla.fenix.termsofuse.TOU_TIME_IN_MILLIS
 import org.mozilla.fenix.utils.Settings
 import org.robolectric.RobolectricTestRunner
@@ -66,7 +68,7 @@ class PrivacyNoticeBannerRepositoryTest {
         settings.termsOfUseAcceptedTimeInMillis = 0
         settings.privacyNoticeBannerLastDisplayedTimeInMillis = 0
 
-        assertTrue(repository.shouldShowPrivacyNoticeBanner())
+        assertEquals(FeatureFlags.NAG_PROMPTS_ENABLED, repository.shouldShowPrivacyNoticeBanner())
     }
 
     @Test
