@@ -38,6 +38,7 @@ import mozilla.components.service.sync.autofill.AutofillCreditCardsAddressesStor
 import mozilla.components.ui.icons.R as iconsR
 import mozilla.components.ui.widgets.withCenterAlignedButtons
 import org.mozilla.fenix.Config
+import org.mozilla.fenix.FeatureFlags
 import org.mozilla.fenix.NavGraphDirections
 import org.mozilla.fenix.R
 import org.mozilla.fenix.components.LogMiddleware
@@ -269,6 +270,11 @@ class AutofillSettingFragment : BiometricPromptPreferenceFragment(), SystemInset
                     )
             },
         )
+        // lavalynx: no sync UI.
+        requirePreference<Preference>(R.string.pref_key_credit_cards_sync_cards_across_devices).isVisible =
+            FeatureFlags.SYNC_UI_ENABLED
+        requirePreference<Preference>(R.string.pref_key_addresses_sync_cards_across_devices).isVisible =
+            FeatureFlags.SYNC_UI_ENABLED
 
         if (requireComponents.settings.isAddressSyncEnabled) {
             SyncPreferenceView(

@@ -29,6 +29,7 @@ import mozilla.components.concept.engine.prompt.PromptRequest
 import mozilla.components.feature.accounts.push.SendTabUseCases
 import mozilla.components.feature.share.RecentAppsStorage
 import mozilla.components.support.utils.ext.packageManagerCompatHelper
+import org.mozilla.fenix.FeatureFlags
 import org.mozilla.fenix.R
 import org.mozilla.fenix.databinding.FragmentShareBinding
 import org.mozilla.fenix.ext.components
@@ -126,6 +127,10 @@ class ShareFragment : AppCompatDialogFragment() {
 
         binding.shareWrapper.setOnClickListener { shareInteractor.onShareClosed() }
         shareToAccountDevicesView = ShareToAccountDevicesView(binding.devicesShareLayout, shareInteractor)
+        if (!FeatureFlags.SYNC_UI_ENABLED) {
+            // lavalynx: no "send to device" / sign-in row in the share sheet.
+            binding.devicesShareGroup.visibility = View.GONE
+        }
 
         if (args.showPage) {
             // Show the previous fragment underneath the share background scrim

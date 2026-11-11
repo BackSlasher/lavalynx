@@ -104,6 +104,7 @@ import mozilla.components.compose.base.utils.BackInvokedHandler
 import mozilla.components.compose.browser.toolbar.concept.BrowserToolbarTestTags.ADDRESSBAR_SEARCH_BOX
 import mozilla.components.support.ktx.util.URLStringUtils
 import mozilla.components.ui.icons.R as iconsR
+import org.mozilla.fenix.FeatureFlags
 import org.mozilla.fenix.R
 import org.mozilla.fenix.bookmarks.BookmarksTestTag.BOOKMARK_PLACEHOLDER
 import org.mozilla.fenix.bookmarks.BookmarksTestTag.BOOKMARK_SEARCH_ITEM
@@ -1040,7 +1041,7 @@ private fun EmptyList(
                 is EmptyListState.NotAuthenticated ->
                     RootEmptyContent(
                         dispatcher,
-                        showSignIn = true,
+                        showSignIn = FeatureFlags.SYNC_UI_ENABLED,
                     )
                 EmptyListState.Authenticated ->
                     RootEmptyContent(

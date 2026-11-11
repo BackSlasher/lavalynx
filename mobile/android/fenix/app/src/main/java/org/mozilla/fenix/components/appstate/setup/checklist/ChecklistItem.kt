@@ -7,6 +7,7 @@ package org.mozilla.fenix.components.appstate.setup.checklist
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import mozilla.components.ui.icons.R as iconsR
+import org.mozilla.fenix.FeatureFlags
 import org.mozilla.fenix.R
 import org.mozilla.fenix.nimbus.SetupChecklistType
 import org.mozilla.fenix.utils.Settings
@@ -104,10 +105,10 @@ fun getSetupChecklistCollection(
 
 private fun createTasksCollection(settings: Settings) =
     with(settings) {
-        listOf(
+        listOfNotNull(
             defaultBrowserTask(isDefaultBrowserBlocking()),
             exploreExtensionTask(hasCompletedSetupStepExtensions),
-            signInTask(signedInFxaAccount),
+            signInTask(signedInFxaAccount).takeIf { FeatureFlags.SYNC_UI_ENABLED },
         )
     }
 
@@ -147,9 +148,9 @@ private fun essentialsGroup(settings: Settings) =
         title = R.string.setup_checklist_group_essentials,
         tasks =
             with(settings) {
-                listOf(
+                listOfNotNull(
                     defaultBrowserTask(isDefaultBrowserBlocking()),
-                    signInTask(signedInFxaAccount),
+                    signInTask(signedInFxaAccount).takeIf { FeatureFlags.SYNC_UI_ENABLED },
                 )
             },
     )

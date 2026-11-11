@@ -12,6 +12,7 @@ import kotlinx.coroutines.CoroutineScope
 import mozilla.components.concept.fetch.Client
 import mozilla.components.concept.sync.Profile
 import mozilla.components.service.fxa.manager.FxaAccountManager
+import org.mozilla.fenix.FeatureFlags
 import org.mozilla.fenix.R
 import org.mozilla.fenix.ext.components
 import org.mozilla.fenix.settings.requirePreference
@@ -43,6 +44,16 @@ class AccountUiView(
      * and logged-in but needs to re-authenticate.
      */
     fun updateAccountUIState(context: Context, profile: Profile?) {
+        if (!FeatureFlags.SYNC_UI_ENABLED) {
+            // lavalynx: no account UI at all, whatever the account state.
+            preferenceSignIn.isVisible = false
+            preferenceSignInPromo.isVisible = false
+            preferenceFirefoxAccount.isVisible = false
+            preferenceFirefoxAccountAuthError.isVisible = false
+            accountPreferenceCategory.isVisible = false
+            return
+        }
+
         val account = accountManager.authenticatedAccount()
 
         // Signed-in, no problems.

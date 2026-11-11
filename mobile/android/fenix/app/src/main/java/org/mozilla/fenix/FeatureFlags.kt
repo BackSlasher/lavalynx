@@ -20,6 +20,16 @@ object FeatureFlags {
     const val FX_SUGGEST = true
 
     /**
+     * lavalynx: whether any Firefox Sync / Mozilla account UI is offered: the Synced Tabs page in the tab manager, the
+     * account entry in the main menus, the sign-in rows in Settings, the sync preferences under Passwords and Autofill,
+     * the sign-in onboarding and setup-checklist steps, "Send to device" and the bookmarks sign-in prompt.
+     *
+     * The account machinery itself stays in place so signed-in state, if any, is left untouched; only the entry points
+     * are hidden.
+     */
+    const val SYNC_UI_ENABLED = false
+
+    /**
      * Disables the Onboarding feature for debug builds by default. Set this to `true` if you need to access the
      * Onboarding feature for development purposes.
      *

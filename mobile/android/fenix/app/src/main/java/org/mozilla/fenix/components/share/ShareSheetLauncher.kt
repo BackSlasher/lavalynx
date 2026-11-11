@@ -27,6 +27,7 @@ import mozilla.components.support.ktx.android.content.share
 import mozilla.components.support.ktx.android.content.shareWithChooserActions
 import mozilla.components.support.ktx.kotlin.trimmed
 import mozilla.components.ui.icons.R as iconsR
+import org.mozilla.fenix.FeatureFlags
 import org.mozilla.fenix.R
 import org.mozilla.fenix.components.menu.share.QRCodeGenerator
 
@@ -257,7 +258,11 @@ class DefaultShareSheetLauncher(
             ShareSheetChooserAction.SAVE_PDF -> savePDFChooserAction(applicationContext, id)
             ShareSheetChooserAction.PRINT -> printAction(applicationContext, id)
             ShareSheetChooserAction.SEND_TO_DEVICES ->
-                sendToDevicesAction(applicationContext, listOf(url), listOf(title.orEmpty()), isPrivate)
+                if (FeatureFlags.SYNC_UI_ENABLED) {
+                    sendToDevicesAction(applicationContext, listOf(url), listOf(title.orEmpty()), isPrivate)
+                } else {
+                    null
+                }
             ShareSheetChooserAction.QR_CODE -> qrCodeAction
         }
 
@@ -328,7 +333,12 @@ class DefaultShareSheetLauncher(
         when (this) {
             ShareSheetChooserAction.SAVE_PDF -> null
             ShareSheetChooserAction.PRINT -> null
-            ShareSheetChooserAction.SEND_TO_DEVICES -> sendToDevicesAction(applicationContext, urls, titles, isPrivate)
+            ShareSheetChooserAction.SEND_TO_DEVICES ->
+                if (FeatureFlags.SYNC_UI_ENABLED) {
+                    sendToDevicesAction(applicationContext, urls, titles, isPrivate)
+                } else {
+                    null
+                }
             ShareSheetChooserAction.QR_CODE -> qrCodeAction
         }
 

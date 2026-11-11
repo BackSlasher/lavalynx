@@ -5,6 +5,7 @@
 package org.mozilla.fenix.components.menu.configuration
 
 import androidx.annotation.VisibleForTesting
+import org.mozilla.fenix.FeatureFlags
 import org.mozilla.fenix.components.menu.CustomizedMenuInfo
 import org.mozilla.fenix.components.menu.configuration.FenixMenuItem.AddToHomeScreen
 import org.mozilla.fenix.components.menu.configuration.FenixMenuItem.Back
@@ -190,7 +191,7 @@ object BrowserMenuConfiguration {
                 MenuSectionConfiguration(
                     id = ACCOUNTS_AND_SETTINGS_GROUP_ID,
                     presentationMode = Row,
-                    items = listOf(MozillaAccount, Settings),
+                    items = listOfNotNull(MozillaAccount.takeIf { FeatureFlags.SYNC_UI_ENABLED }, Settings),
                 ),
                 MenuSectionConfiguration(
                     id = QUIT_GROUP_ID,
