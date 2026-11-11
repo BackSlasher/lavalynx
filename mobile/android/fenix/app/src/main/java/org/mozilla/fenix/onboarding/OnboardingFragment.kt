@@ -87,7 +87,10 @@ class OnboardingFragment : Fragment() {
     }
 
     private val marketingPage by lazy {
-        allOnboardingPages.find { it.type == OnboardingPageUiData.Type.MARKETING_DATA }
+        // lavalynx: no marketing-partner card, even if the install referrer would ask for one later.
+        allOnboardingPages
+            .find { it.type == OnboardingPageUiData.Type.MARKETING_DATA }
+            ?.takeIf { FeatureFlags.MARKETING_DATA_ENABLED }
     }
 
     /**

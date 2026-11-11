@@ -30,6 +30,25 @@ object FeatureFlags {
     const val SYNC_UI_ENABLED = false
 
     /**
+     * lavalynx: whether any sponsored (paid placement) content is shown: sponsored shortcuts on the home screen,
+     * sponsored stories in the Stories section, and sponsored Firefox Suggest results in the address bar. With it off,
+     * the matching Settings toggles are hidden and the ads.mozilla.org fetches never start.
+     */
+    const val SPONSORED_CONTENT_ENABLED = false
+
+    /**
+     * lavalynx: whether Nimbus messages are shown at all: the home screen message card, push notification messages, the
+     * full-screen survey and microsurveys, whether built in or pushed remotely by Mozilla.
+     */
+    const val REMOTE_MESSAGES_ENABLED = false
+
+    /**
+     * lavalynx: whether install-attribution data may be shared with Mozilla's marketing partners. With it off, the
+     * marketing onboarding card never asks, the setting always reads false and its Data Choices toggle is hidden.
+     */
+    const val MARKETING_DATA_ENABLED = false
+
+    /**
      * Disables the Onboarding feature for debug builds by default. Set this to `true` if you need to access the
      * Onboarding feature for development purposes.
      *

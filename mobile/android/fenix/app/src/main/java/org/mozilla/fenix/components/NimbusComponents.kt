@@ -22,10 +22,12 @@ import org.mozilla.experiments.nimbus.internal.EnrollmentSlugs
 import org.mozilla.experiments.nimbus.internal.NimbusException
 import org.mozilla.experiments.nimbus.internal.getActiveEnrollments
 import org.mozilla.fenix.BuildConfig
+import org.mozilla.fenix.FeatureFlags
 import org.mozilla.fenix.experiments.createNimbus
 import org.mozilla.fenix.experiments.prefhandling.NimbusGeckoPrefHandler
 import org.mozilla.fenix.ext.components
 import org.mozilla.fenix.messaging.CustomAttributeProvider
+import org.mozilla.fenix.messaging.NoMessagesController
 
 /** Component group for access to Nimbus and other Nimbus services. */
 @OptIn(ExperimentalAndroidComponentsApi::class)
@@ -96,10 +98,12 @@ class NimbusComponents(
      * component.
      */
     val messaging: NimbusMessagingControllerInterface by lazy {
-        NimbusMessagingController(
-            messagingStorage = messagingStorage,
-            deepLinkScheme = BuildConfig.DEEP_LINK_SCHEME,
-        )
+        val controller =
+            NimbusMessagingController(
+                messagingStorage = messagingStorage,
+                deepLinkScheme = BuildConfig.DEEP_LINK_SCHEME,
+            )
+        if (FeatureFlags.REMOTE_MESSAGES_ENABLED) controller else NoMessagesController(controller)
     }
 
     /**

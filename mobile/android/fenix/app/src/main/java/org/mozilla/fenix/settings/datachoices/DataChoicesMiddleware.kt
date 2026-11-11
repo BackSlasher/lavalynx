@@ -14,6 +14,7 @@ import mozilla.components.lib.crash.store.CrashReportOption
 import mozilla.components.lib.state.Middleware
 import mozilla.components.lib.state.Store
 import mozilla.components.service.nimbus.NimbusApi
+import org.mozilla.fenix.FeatureFlags
 import org.mozilla.fenix.R
 import org.mozilla.fenix.components.metrics.MetricController
 import org.mozilla.fenix.components.metrics.MetricServiceType
@@ -50,7 +51,9 @@ internal class DataChoicesMiddleware(
                             telemetryEnabled = settings.isTelemetryEnabled,
                             usagePingEnabled = settings.isDailyUsagePingEnabled,
                             studiesEnabled = settings.isExperimentationEnabled,
-                            showMeasurementDataSection = settings.hasMadeMarketingTelemetrySelection,
+                            // lavalynx: no marketing-partner sharing, so no toggle for it.
+                            showMeasurementDataSection =
+                                FeatureFlags.MARKETING_DATA_ENABLED && settings.hasMadeMarketingTelemetrySelection,
                             measurementDataEnabled = settings.isMarketingTelemetryEnabled,
                             crashReportOption = crashReportCache.getReportOption(),
                         )

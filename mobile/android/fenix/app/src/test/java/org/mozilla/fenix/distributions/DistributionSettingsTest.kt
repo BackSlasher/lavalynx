@@ -6,6 +6,7 @@ package org.mozilla.fenix.distributions
 
 import mozilla.components.support.test.robolectric.testContext
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -38,10 +39,11 @@ class DistributionSettingsTest {
         assertEquals("test", subject.getDistributionId())
     }
 
+    // lavalynx: the selection is recorded, but marketing-partner sharing always reads as off.
     @Test
-    fun `WHEN the marketing telemetry prefs are set THEN they are correct`() {
+    fun `WHEN the marketing telemetry prefs are set THEN sharing still reads as off`() {
         subject.setMarketingTelemetryPreferences()
-        assertTrue(settings.isMarketingTelemetryEnabled)
+        assertFalse(settings.isMarketingTelemetryEnabled)
         assertTrue(settings.hasMadeMarketingTelemetrySelection)
     }
 }

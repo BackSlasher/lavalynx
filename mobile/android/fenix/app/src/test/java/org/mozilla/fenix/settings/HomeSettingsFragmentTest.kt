@@ -72,13 +72,14 @@ internal class HomeSettingsFragmentTest {
         assertFalse(getSponsoredStoriesPreference().isVisible)
     }
 
+    // lavalynx: sponsored stories are hard-disabled, so their toggle stays hidden even where the feature is supported.
     @Test
-    fun `GIVEN the Pocket sponsored stories feature is enabled for the app WHEN accessing settings THEN the settings for it are visible`() {
+    fun `GIVEN the Pocket sponsored stories feature is enabled for the app WHEN accessing settings THEN the settings for it stay hidden`() {
         every { contentRecommendationsHelper.isPocketSponsoredStoriesFeatureEnabled(any()) } returns true
 
         activateFragment()
 
-        assertTrue(getSponsoredStoriesPreference().isVisible)
+        assertFalse(getSponsoredStoriesPreference().isVisible)
     }
 
     @Test

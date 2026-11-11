@@ -240,12 +240,16 @@ class Settings(
 
     /** Indicates if the Pocket recommendations homescreen section should also show sponsored stories. */
     @Suppress("DEPRECATION")
-    val showPocketSponsoredStories by
+    private val showPocketSponsoredStoriesPref by
         lazyFeatureFlagBooleanPreference(
             key = appContext.getPreferenceKey(R.string.pref_key_pocket_sponsored_stories),
             defaultValue = { homescreenSections[HomeScreenSection.POCKET_SPONSORED_STORIES] == true },
             featureFlag = ContentRecommendationsFeatureHelper.isPocketSponsoredStoriesFeatureEnabled(appContext),
         )
+
+    /** lavalynx: always false while [FeatureFlags.SPONSORED_CONTENT_ENABLED] is off. */
+    val showPocketSponsoredStories: Boolean
+        get() = FeatureFlags.SPONSORED_CONTENT_ENABLED && showPocketSponsoredStoriesPref
 
     /** Indicates whether or not the "Recently Visited" section should be shown on the home screen. */
     var historyMetadataUIFeature by
@@ -708,11 +712,18 @@ class Settings(
             default = true,
         )
 
-    var isMarketingTelemetryEnabled by
+    private var isMarketingTelemetryEnabledPref by
         booleanPreference(
             appContext.getPreferenceKey(R.string.pref_key_marketing_telemetry),
             default = false,
         )
+
+    /** lavalynx: always false while [FeatureFlags.MARKETING_DATA_ENABLED] is off. */
+    var isMarketingTelemetryEnabled: Boolean
+        get() = FeatureFlags.MARKETING_DATA_ENABLED && isMarketingTelemetryEnabledPref
+        set(value) {
+            isMarketingTelemetryEnabledPref = value
+        }
 
     var hasMadeMarketingTelemetrySelection by
         booleanPreference(
@@ -2394,12 +2405,22 @@ class Settings(
             default = { isAutofillSupported },
         )
 
-    /** Indicates if the Contile functionality should be visible. */
-    var showContileFeature by
+    private var showContileFeaturePref by
         booleanPreference(
             key = appContext.getPreferenceKey(R.string.pref_key_enable_contile),
             default = true,
         )
+
+    /**
+     * Indicates if the Contile (sponsored shortcuts) functionality should be visible.
+     *
+     * lavalynx: always false while [FeatureFlags.SPONSORED_CONTENT_ENABLED] is off.
+     */
+    var showContileFeature: Boolean
+        get() = FeatureFlags.SPONSORED_CONTENT_ENABLED && showContileFeaturePref
+        set(value) {
+            showContileFeaturePref = value
+        }
 
     /** Blocklist used to filter items from the home screen that have previously been removed. */
     var homescreenBlocklist by
@@ -2528,12 +2549,22 @@ class Settings(
             default = { FxNimbus.features.migrateOnboardingState.value().enabled },
         )
 
-    /** Indicates if the marketing onboarding card should be shown to the user. */
-    var shouldShowMarketingOnboarding by
+    private var shouldShowMarketingOnboardingPref by
         booleanPreference(
             appContext.getPreferenceKey(R.string.pref_key_should_show_marketing_onboarding),
             default = false,
         )
+
+    /**
+     * Indicates if the marketing onboarding card should be shown to the user.
+     *
+     * lavalynx: always false while [FeatureFlags.MARKETING_DATA_ENABLED] is off.
+     */
+    var shouldShowMarketingOnboarding: Boolean
+        get() = FeatureFlags.MARKETING_DATA_ENABLED && shouldShowMarketingOnboardingPref
+        set(value) {
+            shouldShowMarketingOnboardingPref = value
+        }
 
     var shouldUseMinimalBottomToolbarWhenEnteringText by
         booleanPreference(
@@ -2777,12 +2808,19 @@ class Settings(
      * computed lazily, and based on whether Firefox Suggest is enabled.
      */
     @Suppress("DEPRECATION")
-    var showSponsoredSuggestions by
+    private var showSponsoredSuggestionsPref by
         lazyFeatureFlagBooleanPreference(
             key = appContext.getPreferenceKey(R.string.pref_key_show_sponsored_suggestions),
             defaultValue = { enableFxSuggest },
             featureFlag = FeatureFlags.FX_SUGGEST,
         )
+
+    /** lavalynx: always false while [FeatureFlags.SPONSORED_CONTENT_ENABLED] is off. */
+    var showSponsoredSuggestions: Boolean
+        get() = FeatureFlags.SPONSORED_CONTENT_ENABLED && showSponsoredSuggestionsPref
+        set(value) {
+            showSponsoredSuggestionsPref = value
+        }
 
     /**
      * Indicates if the user has chosen to show search suggestions for web content in the awesomebar. The default value
@@ -2792,7 +2830,8 @@ class Settings(
     var showNonSponsoredSuggestions by
         lazyFeatureFlagBooleanPreference(
             key = appContext.getPreferenceKey(R.string.pref_key_show_nonsponsored_suggestions),
-            defaultValue = { enableFxSuggest },
+            // lavalynx: off until the user turns it on in Settings > Search (upstream: `enableFxSuggest`).
+            defaultValue = { false },
             featureFlag = FeatureFlags.FX_SUGGEST,
         )
 

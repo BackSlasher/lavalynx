@@ -14,6 +14,7 @@ import androidx.preference.CheckBoxPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
+import org.mozilla.fenix.FeatureFlags
 import org.mozilla.fenix.GleanMetrics.CustomizeHome
 import org.mozilla.fenix.GleanMetrics.Events
 import org.mozilla.fenix.R
@@ -76,6 +77,8 @@ class HomeSettingsFragment : PreferenceFragmentCompat(), SystemInsetsPaddedFragm
         }
 
         requirePreference<CheckBoxPreference>(R.string.pref_key_enable_contile).apply {
+            // lavalynx: no sponsored shortcuts, so no toggle for them.
+            isVisible = FeatureFlags.SPONSORED_CONTENT_ENABLED
             isChecked = fenixSettings.showContileFeature
             onPreferenceChangeListener = createMetricPreferenceChangeListener("contile")
         }
@@ -107,7 +110,10 @@ class HomeSettingsFragment : PreferenceFragmentCompat(), SystemInsetsPaddedFragm
         }
 
         requirePreference<CheckBoxPreference>(R.string.pref_key_pocket_sponsored_stories).apply {
-            isVisible = contentRecommendationsHelper.isPocketSponsoredStoriesFeatureEnabled(requireContext())
+            // lavalynx: no sponsored stories, so no toggle for them.
+            isVisible =
+                FeatureFlags.SPONSORED_CONTENT_ENABLED &&
+                    contentRecommendationsHelper.isPocketSponsoredStoriesFeatureEnabled(requireContext())
             isChecked = fenixSettings.showPocketSponsoredStories
             onPreferenceChangeListener = Preference.OnPreferenceChangeListener { preference, newValue ->
                 val newBooleanValue = newValue as? Boolean ?: return@OnPreferenceChangeListener false

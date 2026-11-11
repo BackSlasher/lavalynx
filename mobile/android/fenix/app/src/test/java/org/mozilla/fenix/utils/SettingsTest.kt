@@ -1644,4 +1644,19 @@ class SettingsTest {
 
         assertEquals("2026-11-01T00:00:00Z", settings.ipProtectionLastDataLimitNoticeCycleResetTime)
     }
+
+    // lavalynx: sponsored content stays off even if the stored preference says otherwise.
+    @Test
+    fun `GIVEN sponsored prefs are switched on WHEN reading them THEN sponsored content stays off`() {
+        settings.showContileFeature = true
+        settings.showSponsoredSuggestions = true
+        settings.preferences
+            .edit()
+            .putBoolean(testContext.getString(R.string.pref_key_pocket_sponsored_stories), true)
+            .apply()
+
+        assertFalse(settings.showContileFeature)
+        assertFalse(settings.showSponsoredSuggestions)
+        assertFalse(settings.showPocketSponsoredStories)
+    }
 }
