@@ -4,5 +4,5 @@
    - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
 <resources>
     <!-- lavalynx: dark plum behind the lava lynx (upstream Nightly: #220033). -->
-    <color name="ic_launcher_background">#1B0D12</color>
+    <color name="ic_launcher_background">#180F14</color>
 </resources>
