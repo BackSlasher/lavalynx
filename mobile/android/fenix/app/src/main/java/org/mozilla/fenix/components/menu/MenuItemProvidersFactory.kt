@@ -50,6 +50,7 @@ import org.mozilla.fenix.ipprotection.VpnMenuItemProvider
 import org.mozilla.fenix.library.history.HistoryMenuItemProvider
 import org.mozilla.fenix.pdf.SaveAsPdfMenuItemProvider
 import org.mozilla.fenix.print.PrintMenuItemProvider
+import org.mozilla.fenix.profiles.ProfilesMenuItemProvider
 import org.mozilla.fenix.settings.SettingsMenuItemProvider
 import org.mozilla.fenix.settings.deletebrowsingdata.DefaultDeleteBrowsingDataController
 import org.mozilla.fenix.settings.deletebrowsingdata.DefaultDeleteBrowsingDataController.DataStorage
@@ -166,6 +167,8 @@ class MenuItemProvidersFactory(
                     requestDesktopSite = useCases.sessionUseCases.requestDesktopSite,
                     scope = menuViewScope,
                 )
+            FenixMenuItem.Profiles -> ProfilesMenuItemProvider(context = context, target = target)
+
             FenixMenuItem.Extensions ->
                 ExtensionsMenuItemProvider(
                     context = context.applicationContext,

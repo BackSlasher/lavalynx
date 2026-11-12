@@ -27,6 +27,7 @@ import org.mozilla.fenix.components.menu.configuration.FenixMenuItem.NewTab
 import org.mozilla.fenix.components.menu.configuration.FenixMenuItem.OpenInApp
 import org.mozilla.fenix.components.menu.configuration.FenixMenuItem.Passwords
 import org.mozilla.fenix.components.menu.configuration.FenixMenuItem.Print
+import org.mozilla.fenix.components.menu.configuration.FenixMenuItem.Profiles
 import org.mozilla.fenix.components.menu.configuration.FenixMenuItem.Quit
 import org.mozilla.fenix.components.menu.configuration.FenixMenuItem.Refresh
 import org.mozilla.fenix.components.menu.configuration.FenixMenuItem.ReportBrokenSite
@@ -166,6 +167,7 @@ object BrowserMenuConfiguration {
                             Bookmark,
                             FindInPage,
                             DesktopSite,
+                            Profiles,
                             Extensions,
                             More(
                                 listOf(
