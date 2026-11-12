@@ -15,6 +15,7 @@ import org.mozilla.fenix.components.menu.configuration.FenixMenuItem.History
 import org.mozilla.fenix.components.menu.configuration.FenixMenuItem.IPProtection
 import org.mozilla.fenix.components.menu.configuration.FenixMenuItem.MozillaAccount
 import org.mozilla.fenix.components.menu.configuration.FenixMenuItem.Passwords
+import org.mozilla.fenix.components.menu.configuration.FenixMenuItem.Profiles
 import org.mozilla.fenix.components.menu.configuration.FenixMenuItem.Quit
 import org.mozilla.fenix.components.menu.configuration.FenixMenuItem.Settings
 import org.mozilla.fenix.components.menu.configuration.MenuPresentationMode.Grid
@@ -45,7 +46,7 @@ object HomeMenuConfiguration {
             MenuSectionConfiguration(
                 id = EXTENSIONS_GROUP_ID,
                 presentationMode = Row,
-                items = listOf(Extensions),
+                items = listOf(Profiles, Extensions),
             ),
             MenuSectionConfiguration(
                 id = LIBRARY_GROUP_ID,

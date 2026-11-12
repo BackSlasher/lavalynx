@@ -25,7 +25,7 @@ and in a handful of marked `// lavalynx:` lines in the Kotlin.
   the setup checklist, the weekly privacy report, Terms of Use re-prompts, the
   privacy notice banner, CFR tooltips and onboarding cards. The matching
   Settings entries still work.
-- **Profiles.** Settings → Profiles creates, renames, deletes and switches
+- **Profiles.** Profiles (in the main menu, above Extensions, or in Settings) creates, renames, deletes and switches
   between profiles, each with its own history, cookies, site data, cache,
   logins, bookmarks, tabs, settings and add-ons. Switching restarts the app.
   The active profile's data *is* the app's data directory, laid out exactly as

@@ -25,6 +25,9 @@ sealed interface FenixMenuItem {
     /** A menu item allowing to bookmark the current page, or to edit the bookmark it already has. */
     data object Bookmark : FenixMenuItem
 
+    /** lavalynx: a menu item opening the profile manager. */
+    data object Profiles : FenixMenuItem
+
     /** A menu item expanding to the user's extensions, or to a list of recommended ones. */
     data object Extensions : FenixMenuItem
 

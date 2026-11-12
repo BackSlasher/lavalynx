@@ -54,6 +54,7 @@ import org.mozilla.fenix.ipprotection.VpnMenuItemProvider
 import org.mozilla.fenix.library.history.HistoryMenuItemProvider
 import org.mozilla.fenix.pdf.SaveAsPdfMenuItemProvider
 import org.mozilla.fenix.print.PrintMenuItemProvider
+import org.mozilla.fenix.profiles.ProfilesMenuItemProvider
 import org.mozilla.fenix.settings.SettingsMenuItemProvider
 import org.mozilla.fenix.settings.deletebrowsingdata.QuitMenuItemProvider
 import org.mozilla.fenix.settings.logins.PasswordsMenuItemProvider
@@ -109,6 +110,7 @@ class MenuItemProvidersFactoryTest {
             listOfNotNull(
                 FenixMenuItem.DefaultBrowserBanner,
                 FenixMenuItem.IPProtection,
+                FenixMenuItem.Profiles,
                 FenixMenuItem.Extensions,
                 FenixMenuItem.History,
                 FenixMenuItem.Bookmarks,
@@ -182,6 +184,7 @@ class MenuItemProvidersFactoryTest {
             FenixMenuItem.CustomizeReaderView::class to ReaderViewMenuItemProvider::class,
             FenixMenuItem.IPProtection::class to VpnMenuItemProvider::class,
             FenixMenuItem.Bookmark::class to BookmarkMenuItemProvider::class,
+            FenixMenuItem.Profiles::class to ProfilesMenuItemProvider::class,
             FenixMenuItem.Extensions::class to ExtensionsMenuItemProvider::class,
             FenixMenuItem.FindInPage::class to FindInPageMenuItemProvider::class,
             FenixMenuItem.DesktopSite::class to DesktopSiteMenuItemProvider::class,

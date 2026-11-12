@@ -14,6 +14,7 @@ import org.mozilla.fenix.components.menu.configuration.FenixMenuItem.Extensions
 import org.mozilla.fenix.components.menu.configuration.FenixMenuItem.History
 import org.mozilla.fenix.components.menu.configuration.FenixMenuItem.IPProtection
 import org.mozilla.fenix.components.menu.configuration.FenixMenuItem.Passwords
+import org.mozilla.fenix.components.menu.configuration.FenixMenuItem.Profiles
 import org.mozilla.fenix.components.menu.configuration.FenixMenuItem.Quit
 import org.mozilla.fenix.components.menu.configuration.FenixMenuItem.Settings
 import org.mozilla.fenix.components.menu.configuration.HomeMenuConfiguration.ACCOUNTS_AND_SETTINGS_GROUP_ID
@@ -32,7 +33,7 @@ class HomeMenuConfigurationTest {
             listOf(
                 section(PROMO_BANNER_GROUP_ID, Row, DefaultBrowserBanner),
                 section(VPN_GROUP_ID, Row, IPProtection),
-                section(EXTENSIONS_GROUP_ID, Row, Extensions),
+                section(EXTENSIONS_GROUP_ID, Row, Profiles, Extensions),
                 section(LIBRARY_GROUP_ID, Grid, History, Bookmarks, Downloads, Passwords),
                 // lavalynx: no Mozilla account entry.
                 section(ACCOUNTS_AND_SETTINGS_GROUP_ID, Row, CustomizeHomepage, Settings),
