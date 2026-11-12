@@ -332,7 +332,7 @@ class SettingsFragment : PreferenceFragmentCompat(), SystemInsetsPaddedFragment 
 
     private fun updateProfilesSummary() {
         requirePreference<Preference>(R.string.lavalynx_pref_key_profiles).summary =
-            getString(R.string.lavalynx_profiles_summary, ProfileSwitcher.store(requireContext()).active().name)
+            getString(R.string.lavalynx_profiles_summary, ProfileSwitcher.store(requireContext()).active().label)
     }
 
     private fun update(

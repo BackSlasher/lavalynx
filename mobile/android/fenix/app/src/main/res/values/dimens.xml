@@ -151,4 +151,5 @@
 
     <!-- lavalynx: side padding of the profile name field. -->
     <dimen name="lavalynx_profiles_dialog_padding">24dp</dimen>
+    <dimen name="lavalynx_profiles_menu_icon_size">24dp</dimen>
 </resources>
