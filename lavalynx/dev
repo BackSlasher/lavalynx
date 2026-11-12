@@ -17,6 +17,13 @@
 #   lavalynx/dev tag                   tag the current commit for release and push the tag
 #   lavalynx/dev clean                 drop the objdir and the cache volumes
 #
+# Testing on an emulator (x86_64, headless, needs /dev/kvm):
+#   lavalynx/dev emu-setup             one-off: emulator + Android 14 x86_64 system image and AVD
+#   lavalynx/dev emu-build             debug-signed x86_64 APK in obj-lavalynx-x86_64
+#   lavalynx/dev emulator              start the headless emulator (blocks; run it in the background)
+#   lavalynx/dev emu-install           install the x86_64 APK on the running emulator
+#   lavalynx/dev adb <args...>         adb against the emulator
+#
 set -euo pipefail
 
 IMAGE=${LAVALYNX_IMAGE:-lavalynx-build}
@@ -25,6 +32,7 @@ ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 OBJDIR=obj-lavalynx
 APK_GLOB="$OBJDIR/gradle/build/mobile/android/fenix/app/outputs/apk/nightly/fenix-arm64-v8a-nightly*.apk"
 OUT_DIR="$OBJDIR/lavalynx"
+EMU_APK_GLOB="obj-lavalynx-x86_64/gradle/build/mobile/android/fenix/app/outputs/apk/nightly/fenix-x86_64-nightly*.apk"
 # Keystore and its passwords. In the repo so they travel with it and need no
 # extra mount, and in .gitignore so they are never committed or snapshotted by jj.
 SECRETS=${LAVALYNX_SECRETS:-$ROOT/.secrets}
@@ -46,10 +54,12 @@ build_image() {
 # :U on the volumes so podman chowns them to that uid.
 # HOME points into a volume: mach keeps its state dir, uv/pip caches and the
 # Android SDK there, and Gradle keeps its own cache in a second volume.
+# EXTRA_RUN_ARGS: additional podman run arguments (devices, networking).
+EXTRA_RUN_ARGS=()
 in_container() {
   local tty=()
   [[ -t 0 && -t 1 ]] && tty=(-it)
-  podman run --rm "${tty[@]}" \
+  podman run --rm "${tty[@]}" "${EXTRA_RUN_ARGS[@]}" \
     --userns=keep-id \
     --tmpfs /tmp:rw,exec,mode=1777 \
     -e HOME=/cache/home \
@@ -57,7 +67,7 @@ in_container() {
     -e JAVA_TOOL_OPTIONS=-Duser.home=/cache/home \
     -e MOZBUILD_STATE_PATH=/cache/mozbuild \
     -e GRADLE_USER_HOME=/cache/gradle \
-    -e MOZCONFIG=/work/lavalynx/mozconfig \
+    -e MOZCONFIG=/work/lavalynx/${MOZCONFIG_NAME:-mozconfig} \
     -v "$ROOT:/work:Z" \
     -v lavalynx-home:/cache/home:U \
     -v lavalynx-mozbuild:/cache/mozbuild:U \
@@ -158,7 +168,30 @@ case "$cmd" in
              git -C "$ROOT" tag "$tag" HEAD
              git -C "$ROOT" push origin "$tag" ;;
 
-  clean)     rm -rf "$ROOT/$OBJDIR"
+  emu-build) ensure_image; ensure_bootstrapped
+             export MOZCONFIG_NAME=mozconfig-x86_64
+             in_container ./mach build
+             in_container ./mach gradle fenix:assembleNightly
+             ls -1 $ROOT/$EMU_APK_GLOB ;;
+
+  emu-setup) ensure_image; ensure_bootstrapped
+             in_container ./mach python python/mozboot/mozboot/android.py --artifact-mode --no-interactive \
+               --avd-manifest python/mozboot/mozboot/android-avds/android34-x86_64.json ;;
+
+  # Host networking so the emulator's adb ports are reachable from the other
+  # containers that `adb` and `emu-install` start.
+  emulator)  ensure_image; ensure_bootstrapped
+             EXTRA_RUN_ARGS=(--device /dev/kvm --network host -e MOZ_HEADLESS=1 --name lavalynx-emulator)
+             in_container ./mach android-emulator --version x86_64 --gpu swiftshader_indirect --wait ;;
+
+  adb)       ensure_image
+             EXTRA_RUN_ARGS=(--network host)
+             in_container /cache/mozbuild/android-sdk-linux/platform-tools/adb "$@" ;;
+
+  emu-install) apk=$(cd "$ROOT" && ls -t $EMU_APK_GLOB | head -1)
+             "$0" adb install -r -d "/work/$apk" ;;
+
+  clean)     rm -rf "$ROOT/$OBJDIR" "$ROOT/obj-lavalynx-x86_64"
              podman volume rm -f lavalynx-home lavalynx-mozbuild lavalynx-gradle ;;
 
   *)         sed -n '2,/^set -euo/p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//;/^set -euo/d'

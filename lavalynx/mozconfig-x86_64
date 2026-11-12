@@ -1,0 +1,8 @@
+# lavalynx test build for the x86_64 Android emulator: the release
+# configuration with another ABI and its own object directory.
+# Used by `lavalynx/dev emu-build`; never released.
+
+. "$topsrcdir/lavalynx/mozconfig"
+
+ac_add_options --target=x86_64
+mk_add_options MOZ_OBJDIR=@TOPSRCDIR@/obj-lavalynx-x86_64
