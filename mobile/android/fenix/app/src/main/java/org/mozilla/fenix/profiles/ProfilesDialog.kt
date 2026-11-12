@@ -5,6 +5,7 @@
 package org.mozilla.fenix.profiles
 
 import android.content.Context
+import android.icu.text.BreakIterator
 import android.text.InputType
 import android.view.Gravity
 import android.view.View
@@ -121,8 +122,41 @@ class ProfilesDialog(private val context: Context, private val onChanged: () -> 
             MaterialAlertDialogBuilder(context)
                 .setTitle(R.string.lavalynx_profiles_change_icon)
                 .setView(grid)
+                .setNeutralButton(R.string.lavalynx_profiles_other_icon) { _, _ -> showCustomIconInput(profile) }
                 .setNegativeButton(R.string.lavalynx_profiles_cancel, null)
                 .show()
+    }
+
+    private fun showCustomIconInput(profile: ProfileStore.Profile) {
+        val input =
+            EditText(context).apply {
+                hint = context.getString(R.string.lavalynx_profiles_other_icon_hint)
+                textSize = ICON_TEXT_SIZE_SP
+                setSingleLine()
+            }
+        val padding = context.resources.getDimensionPixelSize(R.dimen.lavalynx_profiles_dialog_padding)
+        val container =
+            FrameLayout(context).apply {
+                setPadding(padding, padding / 2, padding, 0)
+                addView(input)
+            }
+        MaterialAlertDialogBuilder(context)
+            .setTitle(R.string.lavalynx_profiles_change_icon)
+            .setView(container)
+            .setPositiveButton(R.string.lavalynx_profiles_set_icon) { _, _ ->
+                firstCharacter(input.text.toString().trim())?.let {
+                    store.setIcon(profile.id, it)
+                    onChanged()
+                }
+            }
+            .setNegativeButton(R.string.lavalynx_profiles_cancel, null)
+            .show()
+    }
+
+    private fun firstCharacter(text: String): String? {
+        if (text.isEmpty()) return null
+        val iterator = BreakIterator.getCharacterInstance().apply { setText(text) }
+        return text.substring(0, iterator.next())
     }
 
     private fun confirmSwitch(profile: ProfileStore.Profile) {
