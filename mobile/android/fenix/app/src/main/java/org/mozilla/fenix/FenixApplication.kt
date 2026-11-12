@@ -137,6 +137,7 @@ import org.mozilla.fenix.perf.StartupTimeline
 import org.mozilla.fenix.perf.StorageStatsMetrics
 import org.mozilla.fenix.perf.runBlockingIncrement
 import org.mozilla.fenix.privacyreport.PrivacyReportWorkerFactory
+import org.mozilla.fenix.profiles.ProfileSwitcher
 import org.mozilla.fenix.push.PushFxaIntegration
 import org.mozilla.fenix.push.WebPushEngineIntegration
 import org.mozilla.fenix.session.VisibilityLifecycleCallback
@@ -207,6 +208,7 @@ open class FenixApplication : Application(), Provider, ThemeProvider {
     override fun attachBaseContext(base: Context) {
         // Sets the locale information. Other threads do not have locale aware needs
         if (base.isMainProcess()) {
+            ProfileSwitcher.applyPendingSwitch(base)
             val localeAwareContext = LocaleManager.onAttachBaseContext(base)
             super.attachBaseContext(localeAwareContext)
         } else {

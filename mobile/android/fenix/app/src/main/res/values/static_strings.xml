@@ -8,6 +8,22 @@
     <string name="firefox" translatable="false">Firefox</string>
     <!-- lavalynx: label of the private "open with" target (IntentReceiverActivityPrivate alias). -->
     <string name="lavalynx_open_target_private" translatable="false">Lavalynx (Private)</string>
+    <!-- lavalynx: profiles. -->
+    <string name="lavalynx_pref_key_profiles" translatable="false">pref_key_lavalynx_profiles</string>
+    <string name="lavalynx_profiles" translatable="false">Profiles</string>
+    <string name="lavalynx_profiles_summary" translatable="false">Using %1$s</string>
+    <string name="lavalynx_profiles_active" translatable="false">%1$s (in use)</string>
+    <string name="lavalynx_profiles_new" translatable="false">New profile</string>
+    <string name="lavalynx_profiles_name_hint" translatable="false">Profile name</string>
+    <string name="lavalynx_profiles_create" translatable="false">Create</string>
+    <string name="lavalynx_profiles_switch" translatable="false">Switch to this profile</string>
+    <string name="lavalynx_profiles_switch_now" translatable="false">Switch to %1$s now?</string>
+    <string name="lavalynx_profiles_switch_explanation" translatable="false">Lavalynx restarts to switch profiles. Open tabs stay with the profile they belong to.</string>
+    <string name="lavalynx_profiles_switch_button" translatable="false">Switch</string>
+    <string name="lavalynx_profiles_rename" translatable="false">Rename</string>
+    <string name="lavalynx_profiles_delete" translatable="false">Delete</string>
+    <string name="lavalynx_profiles_delete_confirm" translatable="false">Delete %1$s and all of its history, cookies, logins, bookmarks and tabs? This cannot be undone.</string>
+    <string name="lavalynx_profiles_cancel" translatable="false">Cancel</string>
 
     <!-- Preference for developers -->
     <string name="preference_leakcanary" translatable="false">LeakCanary</string>

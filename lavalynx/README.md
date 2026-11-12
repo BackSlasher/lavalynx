@@ -25,6 +25,14 @@ and in a handful of marked `// lavalynx:` lines in the Kotlin.
   the setup checklist, the weekly privacy report, Terms of Use re-prompts, the
   privacy notice banner, CFR tooltips and onboarding cards. The matching
   Settings entries still work.
+- **Profiles.** Settings → Profiles creates, renames, deletes and switches
+  between profiles, each with its own history, cookies, site data, cache,
+  logins, bookmarks, tabs, settings and add-ons. Switching restarts the app.
+  The active profile's data *is* the app's data directory, laid out exactly as
+  upstream; inactive profiles are parked under `lavalynx_profiles/<id>/`, and
+  the next main process swaps them with renames before anything opens a file
+  (`profiles/ProfileStore.kt`, journalled so an interrupted switch resumes).
+- **Lavalynx branding.** Launcher icon, in-app logo and home-screen wordmark.
 - **Its own package name and label.** The Nightly build type is
   `org.mozilla.lavalynx`, named "Lavalynx", so it installs next to any Firefox
   channel rather than colliding with Firefox Nightly.
@@ -55,6 +63,21 @@ named volumes `lavalynx-mozbuild`, `lavalynx-gradle` and `lavalynx-home`; the
 object directory is `obj-lavalynx/` in the checkout (gitignored).
 
 The mozconfig is `lavalynx/mozconfig` and is picked up through `MOZCONFIG`.
+
+### Testing on an emulator
+
+A headless x86_64 emulator runs in the same container (it needs `/dev/kvm`).
+The test APK is a separate x86_64 artifact build in `obj-lavalynx-x86_64/`
+(`lavalynx/mozconfig-x86_64`), debug-signed, never released.
+
+```sh
+lavalynx/dev emu-setup     # once: emulator + Android 14 x86_64 AVD
+lavalynx/dev emu-build     # x86_64 APK
+lavalynx/dev emulator &    # boots headless, blocks until it exits
+lavalynx/dev emu-install
+lavalynx/dev adb shell am start -n org.mozilla.lavalynx/org.mozilla.fenix.HomeActivity
+lavalynx/dev adb exec-out screencap -p > shot.png
+```
 
 ## Installing on a phone
 

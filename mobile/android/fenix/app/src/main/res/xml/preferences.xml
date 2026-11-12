@@ -45,6 +45,11 @@
         android:layout="@layout/preference_category_no_icon_style">
         <androidx.preference.Preference
             app:iconSpaceReserved="false"
+            android:key="@string/lavalynx_pref_key_profiles"
+            android:title="@string/lavalynx_profiles" />
+
+        <androidx.preference.Preference
+            app:iconSpaceReserved="false"
             android:key="@string/pref_key_search_settings"
             android:title="@string/preferences_search" />
 

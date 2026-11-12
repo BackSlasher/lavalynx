@@ -88,6 +88,8 @@ import org.mozilla.fenix.home.maybeRequestDefaultBrowserPrompt
 import org.mozilla.fenix.nimbus.FxNimbus
 import org.mozilla.fenix.perf.ProfilerViewModel
 import org.mozilla.fenix.perf.ProfilerViewModelFactory
+import org.mozilla.fenix.profiles.ProfileSwitcher
+import org.mozilla.fenix.profiles.ProfilesDialog
 import org.mozilla.fenix.settings.account.AccountUiView
 import org.mozilla.fenix.settings.account.SignInPromoPreference
 import org.mozilla.fenix.snackbar.FenixSnackbarDelegate
@@ -329,10 +331,16 @@ class SettingsFragment : PreferenceFragmentCompat(), SystemInsetsPaddedFragment 
         accountUiView.cancel()
     }
 
+    private fun updateProfilesSummary() {
+        requirePreference<Preference>(R.string.lavalynx_pref_key_profiles).summary =
+            getString(R.string.lavalynx_profiles_summary, ProfileSwitcher.store(requireContext()).active().name)
+    }
+
     private fun update(
         shouldUpdateAccountUIState: Boolean,
         settings: Settings,
     ) {
+        updateProfilesSummary()
         val aboutPreference = requirePreference<Preference>(R.string.pref_key_about)
         val appName = getString(R.string.app_name)
         aboutPreference.title = getString(R.string.preferences_about, appName)
@@ -398,6 +406,11 @@ class SettingsFragment : PreferenceFragmentCompat(), SystemInsetsPaddedFragment 
                 }
 
                 // General preferences
+                resources.getString(R.string.lavalynx_pref_key_profiles) -> {
+                    ProfilesDialog(requireContext()) { updateProfilesSummary() }.show()
+                    null
+                }
+
                 resources.getString(R.string.pref_key_search_settings) -> {
                     SettingsFragmentDirections.actionSettingsFragmentToSearchEngineFragment()
                 }
