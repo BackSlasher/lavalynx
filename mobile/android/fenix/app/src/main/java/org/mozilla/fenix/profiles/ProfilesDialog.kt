@@ -6,8 +6,15 @@ package org.mozilla.fenix.profiles
 
 import android.content.Context
 import android.text.InputType
+import android.view.Gravity
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.GridView
+import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.mozilla.fenix.R
 
@@ -27,7 +34,7 @@ class ProfilesDialog(private val context: Context, private val onChanged: () -> 
         val labels =
             profiles
                 .map {
-                    if (it.id == active.id) context.getString(R.string.lavalynx_profiles_active, it.name) else it.name
+                    if (it.id == active.id) context.getString(R.string.lavalynx_profiles_active, it.label) else it.label
                 }
                 .toTypedArray()
         MaterialAlertDialogBuilder(context)
@@ -42,10 +49,11 @@ class ProfilesDialog(private val context: Context, private val onChanged: () -> 
         val actions = buildList {
             if (!isActive) add(R.string.lavalynx_profiles_switch to { confirmSwitch(profile) })
             add(R.string.lavalynx_profiles_rename to { showNameInput(profile) })
+            add(R.string.lavalynx_profiles_change_icon to { showIconPicker(profile) })
             if (!isActive) add(R.string.lavalynx_profiles_delete to { confirmDelete(profile) })
         }
         MaterialAlertDialogBuilder(context)
-            .setTitle(profile.name)
+            .setTitle(profile.label)
             .setItems(actions.map { context.getString(it.first) }.toTypedArray()) { _, which ->
                 actions[which].second()
             }
@@ -87,9 +95,39 @@ class ProfilesDialog(private val context: Context, private val onChanged: () -> 
             .show()
     }
 
+    private fun showIconPicker(profile: ProfileStore.Profile) {
+        val padding = context.resources.getDimensionPixelSize(R.dimen.lavalynx_profiles_dialog_padding)
+        lateinit var dialog: AlertDialog
+        val grid =
+            GridView(context).apply {
+                numColumns = ICON_COLUMNS
+                setPadding(padding, padding / 2, padding, 0)
+                adapter =
+                    object : ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, ProfileStore.ICONS) {
+                        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View =
+                            (super.getView(position, convertView, parent) as TextView).apply {
+                                textSize = ICON_TEXT_SIZE_SP
+                                gravity = Gravity.CENTER
+                                isSelected = getItem(position) == profile.icon
+                            }
+                    }
+                setOnItemClickListener { _, _, position, _ ->
+                    store.setIcon(profile.id, ProfileStore.ICONS[position])
+                    onChanged()
+                    dialog.dismiss()
+                }
+            }
+        dialog =
+            MaterialAlertDialogBuilder(context)
+                .setTitle(R.string.lavalynx_profiles_change_icon)
+                .setView(grid)
+                .setNegativeButton(R.string.lavalynx_profiles_cancel, null)
+                .show()
+    }
+
     private fun confirmSwitch(profile: ProfileStore.Profile) {
         MaterialAlertDialogBuilder(context)
-            .setTitle(context.getString(R.string.lavalynx_profiles_switch_now, profile.name))
+            .setTitle(context.getString(R.string.lavalynx_profiles_switch_now, profile.label))
             .setMessage(R.string.lavalynx_profiles_switch_explanation)
             .setPositiveButton(R.string.lavalynx_profiles_switch_button) { _, _ ->
                 ProfileSwitcher.switchTo(context, profile.id)
@@ -100,7 +138,7 @@ class ProfilesDialog(private val context: Context, private val onChanged: () -> 
 
     private fun confirmDelete(profile: ProfileStore.Profile) {
         MaterialAlertDialogBuilder(context)
-            .setTitle(profile.name)
+            .setTitle(profile.label)
             .setMessage(context.getString(R.string.lavalynx_profiles_delete_confirm, profile.name))
             .setPositiveButton(R.string.lavalynx_profiles_delete) { _, _ ->
                 store.delete(profile.id)
@@ -108,5 +146,10 @@ class ProfilesDialog(private val context: Context, private val onChanged: () -> 
             }
             .setNegativeButton(R.string.lavalynx_profiles_cancel, null)
             .show()
+    }
+
+    private companion object {
+        const val ICON_COLUMNS = 6
+        const val ICON_TEXT_SIZE_SP = 28f
     }
 }

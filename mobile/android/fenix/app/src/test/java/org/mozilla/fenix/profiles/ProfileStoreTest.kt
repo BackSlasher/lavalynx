@@ -117,6 +117,19 @@ class ProfileStoreTest {
     }
 
     @Test
+    fun `WHEN creating profiles THEN each gets an unused icon`() {
+        val icons = listOf(store.active().icon, store.create("Work").icon, store.create("Games").icon)
+        assertEquals(ProfileStore.ICONS.take(3), icons)
+    }
+
+    @Test
+    fun `WHEN changing the icon THEN the new icon is stored`() {
+        val work = store.create("Work")
+        store.setIcon(work.id, ProfileStore.ICONS.last())
+        assertEquals(ProfileStore.ICONS.last(), ProfileStore(dataDir).profiles().last().icon)
+    }
+
+    @Test
     fun `WHEN renaming THEN the new name is stored`() {
         store.rename("default", "  Personal ")
         assertEquals("Personal", ProfileStore(dataDir).active().name)

@@ -21,6 +21,7 @@
     <string name="lavalynx_profiles_switch_explanation" translatable="false">Lavalynx restarts to switch profiles. Open tabs stay with the profile they belong to.</string>
     <string name="lavalynx_profiles_switch_button" translatable="false">Switch</string>
     <string name="lavalynx_profiles_rename" translatable="false">Rename</string>
+    <string name="lavalynx_profiles_change_icon" translatable="false">Change icon</string>
     <string name="lavalynx_profiles_delete" translatable="false">Delete</string>
     <string name="lavalynx_profiles_delete_confirm" translatable="false">Delete %1$s and all of its history, cookies, logins, bookmarks and tabs? This cannot be undone.</string>
     <string name="lavalynx_profiles_cancel" translatable="false">Cancel</string>

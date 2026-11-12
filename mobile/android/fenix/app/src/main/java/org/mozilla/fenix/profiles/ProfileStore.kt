@@ -26,8 +26,13 @@ class ProfileStore(private val dataDir: File) {
      *
      * @property id Stable identifier, also the name of its parking directory.
      * @property name Name shown to the user.
+     * @property icon Emoji shown next to the name.
      */
-    data class Profile(val id: String, val name: String)
+    data class Profile(val id: String, val name: String, val icon: String = ICONS.first()) {
+        /** The icon and name, for lists and summaries. */
+        val label: String
+            get() = "$icon $name"
+    }
 
     private val root = File(dataDir, ROOT_DIR)
     private val stateFile = File(root, STATE_FILE)
@@ -42,7 +47,8 @@ class ProfileStore(private val dataDir: File) {
     fun create(name: String): Profile {
         val state = load()
         val id = generateSequence(1) { it + 1 }.map { "p$it" }.first { id -> state.profiles.none { it.id == id } }
-        val profile = Profile(id, name.trim().ifEmpty { id })
+        val icon = ICONS.firstOrNull { icon -> state.profiles.none { it.icon == icon } } ?: ICONS.first()
+        val profile = Profile(id, name.trim().ifEmpty { id }, icon)
         save(state.copy(profiles = state.profiles + profile))
         return profile
     }
@@ -53,6 +59,12 @@ class ProfileStore(private val dataDir: File) {
         val trimmed = name.trim()
         if (trimmed.isEmpty()) return
         save(state.copy(profiles = state.profiles.map { if (it.id == id) it.copy(name = trimmed) else it }))
+    }
+
+    /** Sets the icon of the profile [id] to [icon]. */
+    fun setIcon(id: String, icon: String) {
+        val state = load()
+        save(state.copy(profiles = state.profiles.map { if (it.id == id) it.copy(icon = icon) else it }))
     }
 
     /** Deletes the profile [id] and all of its data. The active profile cannot be deleted. */
@@ -128,7 +140,13 @@ class ProfileStore(private val dataDir: File) {
         if (stateFile.exists()) stateFile.inputStream().use { props.load(it) }
         val ids = props.getProperty(KEY_IDS).orEmpty().split(',').filter { it.isNotBlank() }
         val profiles =
-            ids.map { Profile(it, props.getProperty("$KEY_NAME_PREFIX$it") ?: it) }
+            ids.mapIndexed { index, id ->
+                    Profile(
+                        id,
+                        props.getProperty("$KEY_NAME_PREFIX$id") ?: id,
+                        props.getProperty("$KEY_ICON_PREFIX$id") ?: ICONS[index % ICONS.size],
+                    )
+                }
                 .ifEmpty {
                     listOf(Profile(DEFAULT_ID, DEFAULT_NAME))
                 }
@@ -145,7 +163,10 @@ class ProfileStore(private val dataDir: File) {
         root.mkdirs()
         val props = Properties()
         props.setProperty(KEY_IDS, state.profiles.joinToString(",") { it.id })
-        state.profiles.forEach { props.setProperty("$KEY_NAME_PREFIX${it.id}", it.name) }
+        state.profiles.forEach {
+            props.setProperty("$KEY_NAME_PREFIX${it.id}", it.name)
+            props.setProperty("$KEY_ICON_PREFIX${it.id}", it.icon)
+        }
         props.setProperty(KEY_ACTIVE, state.active)
         state.pending?.let { props.setProperty(KEY_PENDING, it) }
         state.phase?.let { props.setProperty(KEY_PHASE, it) }
@@ -165,11 +186,35 @@ class ProfileStore(private val dataDir: File) {
         private const val DEFAULT_NAME = "Default"
         private const val KEY_IDS = "ids"
         private const val KEY_NAME_PREFIX = "name."
+        private const val KEY_ICON_PREFIX = "icon."
         private const val KEY_ACTIVE = "active"
         private const val KEY_PENDING = "pending"
         private const val KEY_PHASE = "phase"
         private const val PHASE_OUT = "out"
         private const val PHASE_IN = "in"
+
+        /** The icons a profile can have. */
+        val ICONS =
+            listOf(
+                "🏠",
+                "💼",
+                "🎮",
+                "🛒",
+                "🎓",
+                "🔒",
+                "🧪",
+                "✈️",
+                "🎵",
+                "📚",
+                "💰",
+                "🐱",
+                "🌋",
+                "⭐",
+                "🌿",
+                "❤️",
+                "👶",
+                "👾",
+            )
 
         // Entries that belong to the installed app rather than to a profile.
         private val KEPT_ENTRIES = setOf(ROOT_DIR, "lib", "code_cache")
