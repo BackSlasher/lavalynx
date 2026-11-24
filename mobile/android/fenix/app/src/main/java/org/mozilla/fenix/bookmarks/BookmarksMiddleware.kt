@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import mozilla.appservices.places.BookmarkRoot
+import mozilla.components.browser.state.selector.selectedTab
+import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.EngineSession
 import mozilla.components.concept.storage.BookmarkInfo
 import mozilla.components.concept.storage.BookmarkNode
@@ -26,6 +28,7 @@ import mozilla.components.lib.state.Store
 import org.mozilla.fenix.browser.browsingmode.BrowsingMode
 import org.mozilla.fenix.components.bookmarks.BookmarksUseCase
 import org.mozilla.fenix.components.usecases.FenixBrowserUseCases
+import org.mozilla.fenix.ext.isBareHomepageTab
 
 private const val WARN_OPEN_ALL_SIZE = 15
 
@@ -64,6 +67,8 @@ private const val SEARCH_DELAY_MS = 250L
 internal class BookmarksMiddleware(
     private val bookmarksStorage: BookmarksStorage,
     private val addNewTabUseCase: TabsUseCases.AddNewTabUseCase,
+    private val removeTabUseCase: TabsUseCases.RemoveTabUseCase,
+    private val browserStore: BrowserStore,
     private val fenixBrowserUseCases: FenixBrowserUseCases,
     private val openBookmarksInNewTab: Boolean,
     private val getNavController: () -> NavController,
@@ -363,15 +368,11 @@ internal class BookmarksMiddleware(
                 lifecycleScope.launch {
                     val dialog = preReductionState.openTabsConfirmationDialog
                     if (dialog is OpenTabsConfirmationDialog.Presenting) {
-                        bookmarksStorage.getTree(dialog.guidToOpen).getOrNull()?.also {
-                            it.children
-                                ?.mapNotNull { it.url }
-                                ?.forEach { url ->
-                                    addNewTabUseCase(
-                                        url = url,
-                                        private = dialog.isPrivate,
-                                    )
-                                }
+                        bookmarksStorage.getTree(dialog.guidToOpen).getOrNull()?.also { tree ->
+                            openAllInNewTabs(
+                                urls = tree.children.orEmpty().mapNotNull { it.url },
+                                isPrivate = dialog.isPrivate,
+                            )
                             showTabsTray(dialog.isPrivate)
                         }
                     }
@@ -795,13 +796,22 @@ internal class BookmarksMiddleware(
                     store.dispatch(OpenTabsConfirmationDialogAction.Present(folder.guid, count, isPrivate))
                     return@launch
                 }
-                tree.children
-                    ?.mapNotNull { it.url }
-                    ?.forEach { url ->
-                        addNewTabUseCase(url = url, private = isPrivate)
-                    }
+                openAllInNewTabs(urls = tree.children.orEmpty().mapNotNull { it.url }, isPrivate = isPrivate)
                 showTabsTray(isPrivate)
             }
+        }
+    }
+
+    /**
+     * lavalynx: with homepage-as-new-tab the new tab page is a real `about:home` tab, and "Open all in new tabs" would
+     * leave it behind, bare, next to the opened bookmarks. Drop it once the bookmarks have replaced it.
+     */
+    private fun openAllInNewTabs(urls: List<String>, isPrivate: Boolean) {
+        val bareHomepageTab =
+            browserStore.state.selectedTab?.takeIf { it.content.private == isPrivate && it.isBareHomepageTab }
+        urls.forEach { url -> addNewTabUseCase(url = url, private = isPrivate) }
+        if (urls.isNotEmpty() && bareHomepageTab != null) {
+            removeTabUseCase(bareHomepageTab.id)
         }
     }
 

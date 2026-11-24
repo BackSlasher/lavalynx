@@ -125,6 +125,8 @@ class BookmarkFragment : Fragment(), SystemInsetsPaddedFragment {
                                     lifecycleScope = lifecycleScope,
                                     bookmarksStorage = requireContext().bookmarkStorage,
                                     addNewTabUseCase = requireComponents.useCases.tabsUseCases.addTab,
+                                    removeTabUseCase = requireComponents.useCases.tabsUseCases.removeTab,
+                                    browserStore = requireComponents.core.store,
                                     fenixBrowserUseCases = requireComponents.useCases.fenixBrowserUseCases,
                                     openBookmarksInNewTab =
                                         if (requireComponents.settings.enableHomepageAsNewTab) {
