@@ -19,7 +19,12 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.runTest
 import mozilla.appservices.places.BookmarkRoot
+import mozilla.components.browser.state.state.BrowserState
+import mozilla.components.browser.state.state.createTab
+import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.EngineSession
+import mozilla.components.concept.engine.history.HistoryItem
+import mozilla.components.concept.engine.utils.ABOUT_HOME_URL
 import mozilla.components.concept.storage.BookmarkInfo
 import mozilla.components.concept.storage.BookmarkNode
 import mozilla.components.concept.storage.BookmarkNodeType
@@ -40,6 +45,8 @@ class BookmarksMiddlewareTest {
     private lateinit var bookmarksStorage: BookmarksStorage
     private lateinit var clipboardManager: ClipboardManager
     private lateinit var addNewTabUseCase: TabsUseCases.AddNewTabUseCase
+    private lateinit var removeTabUseCase: TabsUseCases.RemoveTabUseCase
+    private lateinit var browserStore: BrowserStore
     private lateinit var fenixBrowserUseCases: FenixBrowserUseCases
     private lateinit var navController: NavController
     private lateinit var exitBookmarks: () -> Unit
@@ -96,6 +103,8 @@ class BookmarksMiddlewareTest {
 
         clipboardManager = mockk(relaxed = true)
         addNewTabUseCase = mockk(relaxed = true)
+        removeTabUseCase = mockk(relaxed = true)
+        browserStore = BrowserStore()
         fenixBrowserUseCases = mockk(relaxed = true)
         navController = mockk(relaxed = true)
         every { navController.popBackStack() } returns true
@@ -2236,6 +2245,96 @@ class BookmarksMiddlewareTest {
         }
 
     @Test
+    fun `GIVEN a bare homepage tab is selected WHEN open all in normal tabs clicked THEN the homepage tab is removed after the bookmarks open`() =
+        runTest {
+            val guid = "guid"
+            val folderItem = BookmarkItem.Folder(title = "title", guid = guid, position = 0u)
+            val folder = generateBookmarkFolder(guid = guid, "title", "parentGuid", position = 0u)
+            coEvery { bookmarksStorage.getTree(guid) } returns Result.success(folder)
+            val homepageTab = createTab(url = ABOUT_HOME_URL, id = "home")
+            browserStore = BrowserStore(BrowserState(tabs = listOf(homepageTab), selectedTabId = homepageTab.id))
+            val middleware = buildMiddleware(this)
+            val store = middleware.makeStore()
+            testScheduler.advanceUntilIdle()
+
+            store.dispatch(BookmarksListMenuAction.Folder.OpenAllInNormalTabClicked(folderItem))
+            testScheduler.advanceUntilIdle()
+
+            folder.children!!.forEach { child ->
+                coVerify(exactly = 1) { addNewTabUseCase.invoke(url = child.url!!, private = false) }
+            }
+            verify(exactly = 1) { removeTabUseCase.invoke(homepageTab.id) }
+        }
+
+    @Test
+    fun `GIVEN a normal bare homepage tab is selected WHEN open all in private tabs clicked THEN the homepage tab stays`() =
+        runTest {
+            val guid = "guid"
+            val folderItem = BookmarkItem.Folder(title = "title", guid = guid, position = 0u)
+            val folder = generateBookmarkFolder(guid = guid, "title", "parentGuid", position = 0u)
+            coEvery { bookmarksStorage.getTree(guid) } returns Result.success(folder)
+            val homepageTab = createTab(url = ABOUT_HOME_URL, id = "home")
+            browserStore = BrowserStore(BrowserState(tabs = listOf(homepageTab), selectedTabId = homepageTab.id))
+            val middleware = buildMiddleware(this)
+            val store = middleware.makeStore()
+            testScheduler.advanceUntilIdle()
+
+            store.dispatch(BookmarksListMenuAction.Folder.OpenAllInPrivateTabClicked(folderItem))
+            testScheduler.advanceUntilIdle()
+
+            verify(exactly = 0) { removeTabUseCase.invoke(any()) }
+        }
+
+    @Test
+    fun `GIVEN a homepage tab with earlier history is selected WHEN open all in normal tabs clicked THEN the tab stays`() =
+        runTest {
+            val guid = "guid"
+            val folderItem = BookmarkItem.Folder(title = "title", guid = guid, position = 0u)
+            val folder = generateBookmarkFolder(guid = guid, "title", "parentGuid", position = 0u)
+            coEvery { bookmarksStorage.getTree(guid) } returns Result.success(folder)
+            val homepageTab =
+                createTab(url = ABOUT_HOME_URL, id = "home").let {
+                    val history =
+                        it.content.history.copy(
+                            items =
+                                listOf(
+                                    HistoryItem(title = "Mozilla", uri = "https://www.mozilla.org"),
+                                    HistoryItem(title = "Homepage", uri = ABOUT_HOME_URL),
+                                ),
+                            currentIndex = 1,
+                        )
+                    it.copy(content = it.content.copy(history = history))
+                }
+            browserStore = BrowserStore(BrowserState(tabs = listOf(homepageTab), selectedTabId = homepageTab.id))
+            val middleware = buildMiddleware(this)
+            val store = middleware.makeStore()
+            testScheduler.advanceUntilIdle()
+
+            store.dispatch(BookmarksListMenuAction.Folder.OpenAllInNormalTabClicked(folderItem))
+            testScheduler.advanceUntilIdle()
+
+            verify(exactly = 0) { removeTabUseCase.invoke(any()) }
+        }
+
+    @Test
+    fun `GIVEN a regular tab is selected WHEN open all in normal tabs clicked THEN no tab is removed`() = runTest {
+        val guid = "guid"
+        val folderItem = BookmarkItem.Folder(title = "title", guid = guid, position = 0u)
+        val folder = generateBookmarkFolder(guid = guid, "title", "parentGuid", position = 0u)
+        coEvery { bookmarksStorage.getTree(guid) } returns Result.success(folder)
+        val tab = createTab(url = "https://www.mozilla.org", id = "tab")
+        browserStore = BrowserStore(BrowserState(tabs = listOf(tab), selectedTabId = tab.id))
+        val middleware = buildMiddleware(this)
+        val store = middleware.makeStore()
+        testScheduler.advanceUntilIdle()
+
+        store.dispatch(BookmarksListMenuAction.Folder.OpenAllInNormalTabClicked(folderItem))
+        testScheduler.advanceUntilIdle()
+
+        verify(exactly = 0) { removeTabUseCase.invoke(any()) }
+    }
+
+    @Test
     fun `GIVEN a folder with 15 or more items WHEN open all in normal tabs clicked in folder item menu THEN show a warning`() =
         runTest {
             val guid = "guid"
@@ -3629,6 +3728,8 @@ class BookmarksMiddlewareTest {
         BookmarksMiddleware(
             bookmarksStorage = bookmarksStorage,
             addNewTabUseCase = addNewTabUseCase,
+            removeTabUseCase = removeTabUseCase,
+            browserStore = browserStore,
             fenixBrowserUseCases = fenixBrowserUseCases,
             openBookmarksInNewTab = openBookmarksInNewTab,
             getNavController = { navController },

@@ -25,6 +25,12 @@ and in a handful of marked `// lavalynx:` lines in the Kotlin.
   the setup checklist, the weekly privacy report, Terms of Use re-prompts, the
   privacy notice banner, CFR tooltips and onboarding cards. The matching
   Settings entries still work.
+- **"Open all in new tabs" drops the bare new tab page.** With upstream's
+  nightly-only "homepage as a new tab", a new tab is a real `about:home` tab, and
+  opening a bookmark folder from it left that tab behind, empty, next to the
+  opened bookmarks. `BookmarksMiddleware` now closes the homepage tab once the
+  bookmarks have opened, if it never showed anything else and is in the same
+  (normal or private) mode.
 - **Profiles.** Profiles (in the main menu, above Extensions, or in Settings) creates, renames, deletes and switches
   between profiles (each with an emoji icon), each with its own history, cookies, site data, cache,
   logins, bookmarks, tabs, settings and add-ons. Switching restarts the app.
