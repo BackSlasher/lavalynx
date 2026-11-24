@@ -144,6 +144,16 @@ build can upgrade an installed lavalynx. **Never commit it**: the repo is public
 
 ## Keeping up with upstream
 
+Before rebasing, park the current `main` on a dated backup branch, so the
+pre-rebase history (and the exact upstream commit the last release was built
+from) stays reachable on the remote:
+
+```sh
+git push origin main:backup/main-$(date +%F)
+```
+
+Then rebase and force-push `main`:
+
 ```sh
 jj git fetch --remote upstream
 jj rebase -d main@upstream        # rebase the lavalynx changes onto the new upstream main
@@ -151,4 +161,8 @@ jj rebase -d main@upstream        # rebase the lavalynx changes onto the new ups
 
 The lavalynx changes are deliberately small and each is one `// lavalynx:`
 marked spot, so rebases should be quiet. If upstream moves the VPN or Sync
-entry points, the markers are what to look for.
+entry points, the markers are what to look for. Rebases so far:
+
+| Date       | Backup branch            | New upstream base |
+| ---------- | ------------------------ | ----------------- |
+| 2026-11-24 | `backup/main-2026-11-24` | `225e2b6abc`      |
